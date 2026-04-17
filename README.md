@@ -1,5 +1,12 @@
 # Pickprism — WordPress theme
 
+![Pickprism theme cover](screenshot.png)
+
+[![WordPress](https://img.shields.io/badge/WordPress-%E2%89%A5%206.0-21759B?logo=wordpress&logoColor=white)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%207.4-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![Build](https://img.shields.io/badge/build-Vite%205-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
+
 Тема для сайта статей в духе g2.com: чистая типографика, карточки, AJAX-поиск, бесконечная лента, закреплённые посты с ручным порядком.
 
 ## Стек
@@ -9,6 +16,20 @@
 - **SCSS** + **Vite** для сборки
 - **Vanilla JS**: AJAX-поиск с `AbortController`, infinite scroll через `IntersectionObserver`, reveal-анимации
 - **REST API** темы: `/wp-json/pickprism/v1/search`, `/wp-json/pickprism/v1/feed`
+
+## Требования
+
+| Компонент | Минимум | Рекомендовано |
+|---|---|---|
+| WordPress | 6.0 | 6.5 |
+| PHP | 7.4 | 8.2 |
+| MySQL / MariaDB | 5.7 / 10.3 | 8.0 / 10.6 |
+| Node.js (только для сборки) | 18 | 20 LTS |
+| npm | 9 | 10 |
+
+Для разработки/сборки темы нужен Node.js — на проде он не требуется (собранные ассеты лежат в `assets/dist/` и коммитятся).
+
+Опциональные, но рекомендованные плагины-соседи: **LiteSpeed Cache** (page cache + WebP), **Rank Math SEO**, **Wordfence**.
 
 ## Установка
 
