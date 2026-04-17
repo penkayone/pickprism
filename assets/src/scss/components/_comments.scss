@@ -1,0 +1,388 @@
+// Comments — список и форма.
+// Дизайн в духе g2: чистые строки, мягкие аватары, тёмный текст.
+// Палитра аватаров — 8 soft фонов, текст всегда --c-text.
+
+@use '../abstracts/mixins' as *;
+
+:root {
+  // 8 мягких фонов для аватаров. Контраст AA с --c-text (#151a26).
+  --avatar-c-0: #e8eaff; // голубой
+  --avatar-c-1: #e3f5ec; // мятный
+  --avatar-c-2: #fdecef; // розовый
+  --avatar-c-3: #fff0da; // персиковый
+  --avatar-c-4: #ece6fb; // сиреневый
+  --avatar-c-5: #e0f1f6; // холодный голубой
+  --avatar-c-6: #fbeedb; // жёлто-бежевый
+  --avatar-c-7: #eef3e0; // оливковый
+}
+
+// -------------------------------------------------------------------------
+// Обёртка секции
+// -------------------------------------------------------------------------
+
+.comments-section {
+  margin-top: var(--sp-9);
+  padding-top: var(--sp-7);
+  border-top: 1px solid var(--c-border);
+}
+
+.comments-title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  color: var(--c-text);
+  margin-bottom: var(--sp-6);
+}
+
+.comments-closed {
+  padding: var(--sp-4);
+  background: var(--c-bg-soft);
+  border-radius: var(--radius-md);
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+// -------------------------------------------------------------------------
+// Список и вложенность
+// -------------------------------------------------------------------------
+
+.comment-list,
+.comment-list .children {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.comment-list > .comment-item {
+  padding: var(--sp-5) 0;
+  border-bottom: 1px solid var(--c-border);
+
+  &:first-child { padding-top: 0; }
+  &:last-child { border-bottom: 0; padding-bottom: 0; }
+}
+
+.comment-list .children {
+  margin-inline-start: var(--sp-6);
+  margin-top: var(--sp-5);
+  padding-inline-start: var(--sp-5);
+  border-inline-start: 1px solid var(--c-border);
+
+  > .comment-item {
+    padding: var(--sp-4) 0;
+
+    &:first-child { padding-top: 0; }
+    &:last-child { padding-bottom: 0; }
+  }
+}
+
+// Макс 2 уровня — глубже не отступаем.
+.comment-list .children .children .children {
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+  border-inline-start: 0;
+}
+
+// -------------------------------------------------------------------------
+// Тело одного комментария
+// -------------------------------------------------------------------------
+
+.comment-body {
+  display: flex;
+  gap: var(--sp-4);
+  align-items: flex-start;
+}
+
+.comment-avatar-col { flex-shrink: 0; }
+
+.comment-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-md);
+  color: var(--c-text);
+  line-height: 1;
+  user-select: none;
+  background: var(--avatar-c-0);
+
+  @media (max-width: 640px) {
+    width: 36px;
+    height: 36px;
+    font-size: var(--fs-base);
+  }
+
+  &[data-bg="0"] { background: var(--avatar-c-0); }
+  &[data-bg="1"] { background: var(--avatar-c-1); }
+  &[data-bg="2"] { background: var(--avatar-c-2); }
+  &[data-bg="3"] { background: var(--avatar-c-3); }
+  &[data-bg="4"] { background: var(--avatar-c-4); }
+  &[data-bg="5"] { background: var(--avatar-c-5); }
+  &[data-bg="6"] { background: var(--avatar-c-6); }
+  &[data-bg="7"] { background: var(--avatar-c-7); }
+}
+
+.comment-content-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+  font-size: var(--fs-sm);
+}
+
+.comment-author {
+  font-weight: var(--fw-semibold);
+  color: var(--c-text);
+}
+
+.comment-sep { color: var(--c-text-subtle); }
+
+.comment-date {
+  color: var(--c-text-muted);
+}
+
+.comment-pending {
+  display: inline-block;
+  margin-left: auto;
+  padding: 2px var(--sp-2);
+  background: #fff4d1;
+  color: #8a6a00;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  border-radius: var(--radius-sm);
+}
+
+.comment-text {
+  color: var(--c-text);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  word-wrap: break-word;
+
+  p { margin: 0 0 var(--sp-3); }
+  p:last-child { margin-bottom: 0; }
+
+  a {
+    color: var(--c-link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    &:hover { color: var(--c-accent-hover); }
+  }
+}
+
+.comment-footer {
+  margin-top: var(--sp-3);
+}
+
+.comment-reply-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    color: var(--c-accent);
+    background: var(--c-accent-soft);
+  }
+
+  &:focus-visible { @include focus-ring; }
+}
+
+// -------------------------------------------------------------------------
+// Форма
+// -------------------------------------------------------------------------
+
+.comment-respond {
+  margin-top: var(--sp-8);
+  padding: var(--sp-6);
+  background: var(--c-bg-soft);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-border);
+}
+
+.comment-respond__title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--c-text);
+  margin-bottom: var(--sp-4);
+
+  #cancel-comment-reply-link {
+    margin-left: var(--sp-3);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-regular);
+    color: var(--c-text-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover { color: var(--c-accent); }
+  }
+}
+
+.comment-form {
+  display: grid;
+  gap: var(--sp-4);
+
+  &__notes {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    margin: 0;
+  }
+
+  &__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    margin: 0;
+  }
+
+  &__label {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--c-text);
+  }
+
+  &__req { color: var(--c-danger); }
+
+  &__input,
+  &__textarea {
+    width: 100%;
+    padding: var(--sp-3) var(--sp-4);
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-base);
+    color: var(--c-text);
+    font-family: inherit;
+    line-height: var(--lh-normal);
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
+
+    &::placeholder { color: var(--c-text-subtle); }
+
+    &:focus {
+      outline: 0;
+      border-color: var(--c-accent);
+      box-shadow: 0 0 0 4px var(--c-accent-soft);
+    }
+  }
+
+  &__textarea {
+    min-height: 120px;
+    resize: vertical;
+    field-sizing: content;
+  }
+
+  // Две колонки имя/email на md+.
+  @include bp-md {
+    &__row--author,
+    &__row--email {
+      grid-column: span 1;
+    }
+
+    & {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    &__notes,
+    &__row--comment,
+    &__actions,
+    &__notice,
+    &__honeypot {
+      grid-column: 1 / -1;
+    }
+  }
+
+  // Cookie opt-in (WP добавляет этот блок).
+  .comment-form-cookies-consent {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+
+    input { accent-color: var(--c-accent); }
+    label { cursor: pointer; }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin: 0;
+  }
+
+  &__submit {
+    position: relative;
+
+    &[disabled],
+    &[aria-busy="true"] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &[aria-busy="true"]::after {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-left: var(--sp-2);
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: comment-spin 0.7s linear infinite;
+    }
+  }
+
+  // Honeypot — визуально и программно спрятан.
+  &__honeypot {
+    position: absolute !important;
+    left: -9999px !important;
+    top: auto !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  &__notice {
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-normal);
+
+    &--success {
+      background: #e5f6ec;
+      color: #1f6a42;
+      border: 1px solid #b8e0c9;
+    }
+
+    &--error {
+      background: #fdecec;
+      color: #9a2a2e;
+      border: 1px solid #f5c3c5;
+    }
+
+    &[hidden] { display: none; }
+  }
+}
+
+@keyframes comment-spin {
+  to { transform: rotate(360deg); }
+}

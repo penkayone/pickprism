@@ -4,6 +4,7 @@ import '../scss/main.scss';
 import { initSearch } from './search.js';
 import { initInfiniteScroll } from './infinite-scroll.js';
 import { initRevealAnimations } from './animations.js';
+import { initComments } from './comments.js';
 
 const ready = (fn) => {
   if (document.readyState !== 'loading') {
@@ -20,4 +21,5 @@ ready(() => {
   initSearch();
   initInfiniteScroll();
   initRevealAnimations();
+  initComments();
 });

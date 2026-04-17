@@ -18,5 +18,6 @@
 @use 'components/footer';
 @use 'components/pagination';
 @use 'components/article';
+@use 'components/comments';
 @use 'components/404' as error404;
 @use 'components/animations';
