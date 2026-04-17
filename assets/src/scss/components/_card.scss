@@ -42,7 +42,6 @@
 
     &--lg {
       font-size: var(--fs-xl);
-      @include bp-md { font-size: var(--fs-2xl); }
     }
   }
 
