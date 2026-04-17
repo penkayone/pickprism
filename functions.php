@@ -48,6 +48,7 @@ pickprism_require_modules(
 		'caching',
 		'sticky',
 		'ajax-search',
+		'comments',
 		'fixtures',
 	)
 );
