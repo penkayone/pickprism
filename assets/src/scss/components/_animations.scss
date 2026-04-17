@@ -1,0 +1,50 @@
+@use '../abstracts/mixins' as *;
+
+// Элементы с классом .reveal появляются при скролле.
+// JS добавляет data-reveal="in" когда элемент в viewport.
+
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+}
+
+.reveal[data-reveal="in"],
+.no-js .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@include reduced-motion {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+// Skeleton-подгружаемые карточки при infinite scroll
+.feed__skeleton {
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+  background: #fff;
+  height: 320px;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.04) 50%, transparent 100%);
+    animation: pp-shimmer 1.4s infinite;
+  }
+}
+
+@keyframes pp-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@include reduced-motion {
+  .feed__skeleton::after { animation: none; }
+}

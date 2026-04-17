@@ -1,0 +1,22 @@
+// Pickprism — главный SCSS вход.
+// Порядок важен: токены → ресет → типографика → лэйаут → компоненты.
+
+@use 'abstracts/tokens';
+@use 'abstracts/mixins';
+
+@use 'base/reset';
+@use 'base/typography';
+@use 'base/layout';
+
+@use 'components/header';
+@use 'components/buttons';
+@use 'components/hero';
+@use 'components/chips';
+@use 'components/search-form';
+@use 'components/card';
+@use 'components/sidebar';
+@use 'components/footer';
+@use 'components/pagination';
+@use 'components/article';
+@use 'components/404' as error404;
+@use 'components/animations';

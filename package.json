@@ -1,0 +1,22 @@
+{
+  "name": "pickprism-theme",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pickprism WordPress theme build pipeline (Vite + SCSS).",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "vite build --mode production",
+    "clean": "rm -rf assets/dist"
+  },
+  "devDependencies": {
+    "sass": "^1.77.0",
+    "vite": "^5.2.0"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead"
+  ]
+}

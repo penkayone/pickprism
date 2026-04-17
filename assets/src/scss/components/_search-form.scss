@@ -1,0 +1,151 @@
+@use '../abstracts/mixins' as *;
+
+.search-form {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+
+  &__field {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 6px 6px 6px var(--sp-4);
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+
+    &:focus-within {
+      border-color: var(--c-accent);
+      box-shadow: 0 0 0 4px var(--c-accent-soft), var(--shadow-md);
+    }
+  }
+
+  &__icon {
+    color: var(--c-text-subtle);
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding: var(--sp-2) 0;
+    font-size: var(--fs-base);
+    &::-webkit-search-cancel-button { appearance: none; }
+  }
+
+  &__submit {
+    flex-shrink: 0;
+    background: var(--c-accent);
+    color: #fff;
+    padding: var(--sp-2) var(--sp-5);
+    border-radius: var(--radius-full);
+    font-weight: var(--fw-medium);
+    font-size: var(--fs-sm);
+    transition: background-color var(--dur-fast) var(--ease-out);
+    &:hover { background: var(--c-accent-hover); }
+  }
+
+  // Большая версия для hero
+  &--lg {
+    .search-form__field {
+      padding: 8px 8px 8px var(--sp-5);
+    }
+    .search-form__input {
+      padding: var(--sp-3) 0;
+      font-size: var(--fs-md);
+    }
+    .search-form__submit {
+      padding: var(--sp-3) var(--sp-6);
+      font-size: var(--fs-base);
+    }
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    z-index: var(--z-dropdown);
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+
+    &:not([hidden]) {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.search-result {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  color: var(--c-text);
+  transition: background-color var(--dur-fast) var(--ease-out);
+  border-bottom: 1px solid var(--c-border);
+
+  &:last-child { border-bottom: 0; }
+
+  &:hover,
+  &[aria-selected="true"] {
+    background: var(--c-bg-soft);
+  }
+
+  &__thumb {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    background: var(--c-bg-muted);
+    overflow: hidden;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  &__body { min-width: 0; flex: 1; }
+
+  &__title {
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+    margin-bottom: 2px;
+    @include clamp-lines(2);
+  }
+
+  &__excerpt {
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    @include clamp-lines(2);
+  }
+}
+
+.search-empty,
+.search-loading {
+  padding: var(--sp-5);
+  text-align: center;
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.search-view-all {
+  display: block;
+  text-align: center;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--c-bg-soft);
+  color: var(--c-accent);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-sm);
+  border-top: 1px solid var(--c-border);
+  &:hover { background: var(--c-accent-soft); }
+}

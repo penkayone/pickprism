@@ -1,0 +1,76 @@
+@use '../abstracts/tokens' as *;
+@use '../abstracts/mixins' as *;
+
+// Шрифт Inter подключается через Google Fonts (см. inc/enqueue.php — preconnect + preload).
+// Локальный self-host шрифта можно добавить позже: положить файл в assets/fonts/inter-variable.woff2
+// и раскомментировать блок @font-face ниже.
+//
+// @font-face {
+//   font-family: 'Inter';
+//   font-style: normal;
+//   font-weight: 400 700;
+//   font-display: swap;
+//   src: url('../../fonts/inter-variable.woff2') format('woff2-variations');
+// }
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  color: var(--c-text);
+  background: var(--c-bg);
+}
+
+h1, h2, h3, h4, h5 {
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  color: var(--c-text);
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: var(--fs-3xl); letter-spacing: -0.02em; }
+h2 { font-size: var(--fs-xl); }
+h3 { font-size: var(--fs-lg); }
+h4 { font-size: var(--fs-md); }
+
+@include bp-md {
+  h1 { font-size: var(--fs-4xl); }
+  h2 { font-size: var(--fs-2xl); }
+}
+
+a {
+  color: var(--c-link);
+  transition: color var(--dur-fast) var(--ease-out);
+  &:hover { color: var(--c-accent-hover); }
+}
+
+p { line-height: var(--lh-relaxed); }
+
+code, pre, kbd, samp {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.92em;
+}
+
+pre {
+  background: var(--c-bg-muted);
+  padding: var(--sp-4);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+blockquote {
+  border-left: 3px solid var(--c-accent);
+  padding-left: var(--sp-4);
+  color: var(--c-text-muted);
+  font-style: italic;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--c-border);
+  margin: var(--sp-6) 0;
+}

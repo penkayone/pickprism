@@ -1,0 +1,30 @@
+@use 'tokens' as *;
+
+@mixin bp-sm {
+  @media (min-width: #{$bp-sm}) { @content; }
+}
+@mixin bp-md {
+  @media (min-width: #{$bp-md}) { @content; }
+}
+@mixin bp-lg {
+  @media (min-width: #{$bp-lg}) { @content; }
+}
+@mixin bp-xl {
+  @media (min-width: #{$bp-xl}) { @content; }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) { @content; }
+}
+
+@mixin focus-ring {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+@mixin clamp-lines($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

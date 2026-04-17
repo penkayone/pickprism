@@ -1,0 +1,26 @@
+@use '../abstracts/mixins' as *;
+
+.error-404 {
+  text-align: center;
+  padding-block: var(--sp-11);
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+
+  &__code {
+    font-size: clamp(80px, 12vw, 160px);
+    font-weight: var(--fw-bold);
+    line-height: 1;
+    background: linear-gradient(135deg, var(--c-accent) 0%, #9b6bff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.04em;
+  }
+
+  &__title { font-size: var(--fs-2xl); }
+  &__text { color: var(--c-text-muted); }
+}
