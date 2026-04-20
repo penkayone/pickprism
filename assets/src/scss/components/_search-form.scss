@@ -77,6 +77,7 @@
     max-height: min(70vh, 520px);
     overflow-y: auto;
     z-index: var(--z-dropdown);
+    text-align: left;
     opacity: 0;
     transform: translateY(-4px);
     transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
