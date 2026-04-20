@@ -72,8 +72,21 @@ add_action(
 			'window.Pickprism = ' . wp_json_encode( $data ) . ';',
 			'before'
 		);
-	}
+
+		// Штатный comment-reply.js нам не нужен — у нас свой обработчик в comments.js.
+		// Отменяем регистрацию на single, чтобы браузер не тянул лишний скрипт.
+		if ( is_singular() && comments_open() ) {
+			wp_dequeue_script( 'comment-reply' );
+			wp_deregister_script( 'comment-reply' );
+		}
+	},
+	20 // после ядра, чтобы dequeue comment-reply сработал.
 );
+
+/**
+ * Гасим штатный wp_enqueue_scripts для threaded-replies — тема сама решает.
+ * add_action на wp_default_scripts не нужен, достаточно dequeue выше.
+ */
 
 /**
  * Preconnect для Google Fonts — чуть быстрее FCP.
