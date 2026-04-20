@@ -45,59 +45,83 @@ add_filter(
  * ------------------------------------------------------------------------- */
 
 /**
- * Убираем поле URL (нам не нужен сайт автора — источник ссылочного спама).
+ * Строит HTML полей «Имя» и «Email» в анонимном стиле — один и тот же набор
+ * используется и для анонимов, и для авторизованных (WP на логине вырезает
+ * эти поля из формы, ниже мы их возвращаем вручную).
+ *
+ * @return array{author:string,email:string}
  */
-add_filter(
-	'comment_form_default_fields',
-	static function ( array $fields ): array {
-		unset( $fields['url'] );
+function pickprism_comment_author_email_fields(): array {
+	$commenter = wp_get_current_commenter();
+	$req       = (bool) get_option( 'require_name_email' );
+	$req_attr  = $req ? 'required aria-required="true"' : '';
 
-		$commenter = wp_get_current_commenter();
-		$req       = (bool) get_option( 'require_name_email' );
-		$req_attr  = $req ? 'required aria-required="true"' : '';
+	$author = sprintf(
+		'<p class="comment-form__row comment-form__row--author">' .
+			'<label for="author" class="comment-form__label">%s%s</label>' .
+			'<input id="author" name="author" type="text" class="comment-form__input" value="%s" maxlength="50" autocomplete="name" %s />' .
+		'</p>',
+		esc_html__( 'Имя', 'pickprism' ),
+		$req ? ' <span class="comment-form__req" aria-hidden="true">*</span>' : '',
+		esc_attr( $commenter['comment_author'] ),
+		$req_attr
+	);
 
-		$fields['author'] = sprintf(
-			'<p class="comment-form__row comment-form__row--author">' .
-				'<label for="author" class="comment-form__label">%s%s</label>' .
-				'<input id="author" name="author" type="text" class="comment-form__input" value="%s" maxlength="50" autocomplete="name" %s />' .
-			'</p>',
-			esc_html__( 'Имя', 'pickprism' ),
-			$req ? ' <span class="comment-form__req" aria-hidden="true">*</span>' : '',
-			esc_attr( $commenter['comment_author'] ),
-			$req_attr
-		);
+	$email = sprintf(
+		'<p class="comment-form__row comment-form__row--email">' .
+			'<label for="email" class="comment-form__label">%s%s</label>' .
+			'<input id="email" name="email" type="email" class="comment-form__input" value="%s" maxlength="100" autocomplete="email" %s />' .
+		'</p>',
+		esc_html__( 'Email', 'pickprism' ),
+		$req ? ' <span class="comment-form__req" aria-hidden="true">*</span>' : '',
+		esc_attr( $commenter['comment_author_email'] ),
+		$req_attr
+	);
 
-		$fields['email'] = sprintf(
-			'<p class="comment-form__row comment-form__row--email">' .
-				'<label for="email" class="comment-form__label">%s%s</label>' .
-				'<input id="email" name="email" type="email" class="comment-form__input" value="%s" maxlength="100" autocomplete="email" %s />' .
-			'</p>',
-			esc_html__( 'Email', 'pickprism' ),
-			$req ? ' <span class="comment-form__req" aria-hidden="true">*</span>' : '',
-			esc_attr( $commenter['comment_author_email'] ),
-			$req_attr
-		);
-
-		// Cookie-opt-in WP добавляет отдельным фильтром — оставляем, но стилизуем.
-		return $fields;
-	}
-);
+	return array(
+		'author' => $author,
+		'email'  => $email,
+	);
+}
 
 /**
- * Добавляем honeypot + timestamp + дополнительный nonce.
+ * Единая нормализация полей формы — срабатывает и для гостей, и для залогиненных.
+ *
+ * WP-ядро в `comment_form()` рендерит поля по циклу с условием
+ * `! is_user_logged_in() || ! isset( $original_fields[ $name ] )`. Из-за этого
+ * родные ключи `author`/`email`/`url` для залогиненного юзера в вывод не попадают.
+ * Мы выпиливаем их из массива и добавляем author/email под уникальными ключами
+ * `pickprism_author` / `pickprism_email` — HTML-атрибуты `name` остаются
+ * `author` и `email`, т.е. бэкенду и REST ничего переучивать не нужно.
+ *
+ * Дополнительно: переопределяем textarea, добавляем honeypot + timestamp + nonce,
+ * упорядочиваем поля.
  */
 add_filter(
 	'comment_form_fields',
 	static function ( array $fields ): array {
-		// Переопределим comment-текстовое поле (оно не в default_fields).
-		if ( isset( $fields['comment'] ) ) {
-			$fields['comment'] = sprintf(
-				'<p class="comment-form__row comment-form__row--comment">' .
-					'<label for="comment" class="comment-form__label">%s <span class="comment-form__req" aria-hidden="true">*</span></label>' .
-					'<textarea id="comment" name="comment" class="comment-form__textarea" rows="5" maxlength="5000" required aria-required="true"></textarea>' .
-				'</p>',
-				esc_html__( 'Комментарий', 'pickprism' )
-			);
+		unset( $fields['author'], $fields['email'], $fields['url'] );
+
+		$custom = pickprism_comment_author_email_fields();
+
+		$comment_field = sprintf(
+			'<p class="comment-form__row comment-form__row--comment">' .
+				'<label for="comment" class="comment-form__label">%s <span class="comment-form__req" aria-hidden="true">*</span></label>' .
+				'<textarea id="comment" name="comment" class="comment-form__textarea" rows="5" maxlength="5000" required aria-required="true"></textarea>' .
+			'</p>',
+			esc_html__( 'Комментарий', 'pickprism' )
+		);
+
+		$ordered = array(
+			'pickprism_author' => $custom['author'],
+			'pickprism_email'  => $custom['email'],
+			'comment'          => $comment_field,
+		);
+
+		foreach ( $fields as $key => $value ) {
+			if ( ! isset( $ordered[ $key ] ) && 'comment' !== $key ) {
+				$ordered[ $key ] = $value;
+			}
 		}
 
 		// Honeypot. Реальный пользователь не заполнит — скрыт CSS + aria-hidden + tabindex=-1.
@@ -121,9 +145,9 @@ add_filter(
 			esc_attr( wp_create_nonce( 'pickprism_comment' ) )
 		);
 
-		$fields['pickprism_extras'] = $honeypot . $ts . $extra_nonce;
+		$ordered['pickprism_extras'] = $honeypot . $ts . $extra_nonce;
 
-		return $fields;
+		return $ordered;
 	}
 );
 
@@ -257,7 +281,7 @@ function pickprism_comment_avatar( string $email, string $name, int $size = 44 )
 	}
 
 	return sprintf(
-		'<span class="comment-avatar" data-bg="%d" style="width:%1$dpx;height:%1$dpx" aria-hidden="true">%s</span>', // phpcs:ignore
+		'<span class="comment-avatar" data-bg="%1$d" style="width:%2$dpx;height:%2$dpx" aria-hidden="true">%3$s</span>',
 		(int) $idx,
 		(int) $size,
 		esc_html( $initial )
@@ -329,7 +353,7 @@ add_action(
 						'required' => true,
 						'type'     => 'string',
 					),
-					'parent'                  => array(
+					'comment_parent'          => array(
 						'required' => false,
 						'type'     => 'integer',
 						'default'  => 0,
@@ -411,7 +435,7 @@ function pickprism_rest_submit_comment( WP_REST_Request $request ) {
 	$author  = sanitize_text_field( (string) $request->get_param( 'author' ) );
 	$email   = sanitize_email( (string) $request->get_param( 'email' ) );
 	$content = trim( (string) $request->get_param( 'comment' ) );
-	$parent  = (int) $request->get_param( 'parent' );
+	$parent  = (int) $request->get_param( 'comment_parent' );
 
 	if ( mb_strlen( $author ) < 2 || mb_strlen( $author ) > 50 ) {
 		return new WP_Error( 'pickprism_bad_author', __( 'Имя должно быть от 2 до 50 символов.', 'pickprism' ), array( 'status' => 400 ) );
@@ -530,6 +554,11 @@ function pickprism_rest_submit_comment( WP_REST_Request $request ) {
  * @param WP_Comment $comment
  */
 function pickprism_render_single_comment( WP_Comment $comment ): string {
+	// Walker_Comment перед вызовом callback выставляет $GLOBALS['comment']; в AJAX-рендере
+	// делаем то же, иначе comment_ID()/get_comment_reply_link() работают с «прежним» комментом.
+	$prev                = $GLOBALS['comment'] ?? null;
+	$GLOBALS['comment']  = $comment;
+
 	ob_start();
 	pickprism_comment_callback(
 		$comment,
@@ -540,5 +569,9 @@ function pickprism_render_single_comment( WP_Comment $comment ): string {
 		max( 1, (int) $comment->comment_parent > 0 ? 2 : 1 )
 	);
 	echo "</li>\n";
-	return (string) ob_get_clean();
+	$html = (string) ob_get_clean();
+
+	$GLOBALS['comment'] = $prev;
+
+	return $html;
 }
