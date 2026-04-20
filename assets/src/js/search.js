@@ -106,6 +106,18 @@ function bindForm(form) {
     if (!form.contains(e.target)) close();
   });
 
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting && !dropdown.hidden) close();
+        }
+      },
+      { threshold: 0 }
+    );
+    io.observe(input);
+  }
+
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       close();
