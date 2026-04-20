@@ -19,13 +19,6 @@ defined( 'ABSPATH' ) || exit;
  * ------------------------------------------------------------------------- */
 
 /**
- * Полностью отключаем настройку «требовать регистрацию» на фронте:
- * возвращаем 0 из get_option( 'comment_registration' ).
- * Админка не трогается — фильтр работает, только когда WP в обычном режиме фронта.
- */
-add_filter( 'option_comment_registration', '__return_zero' );
-
-/**
  * Не отправляем уведомления об одобрении модератору от имени юзера,
  * не подставляем avatar пользователя и т.п. — оставляем ядру решать,
  * но сам коммент идёт обезличенным (user_id=0) через preprocess_comment ниже.
@@ -177,7 +170,10 @@ add_filter(
 );
 
 /**
- * Гасим «вы должны войти, чтобы оставить комментарий» на уровне функции ядра.
+ * Полностью отключаем настройку «требовать регистрацию» на фронте.
+ * `pre_option_*` срабатывает ДО чтения опции из БД и перекрывает её —
+ * отдельный `option_comment_registration` не нужен. Админка не затрагивается:
+ * фильтр активен только на запросах, где подключается тема (фронт + REST).
  */
 add_filter( 'pre_option_comment_registration', '__return_zero' );
 
@@ -451,24 +447,52 @@ function pickprism_rest_submit_comment( WP_REST_Request $request ) {
 		if ( ! $parent_comment || (int) $parent_comment->comment_post_ID !== $post_id ) {
 			return new WP_Error( 'pickprism_bad_parent', __( 'Родительский комментарий не найден.', 'pickprism' ), array( 'status' => 400 ) );
 		}
+
+		// Валидация глубины: не даём превысить thread_comments_depth.
+		// Если threading выключен — пропускаем, плоский режим сам схлопнет parent в 0.
+		if ( (int) get_option( 'thread_comments' ) === 1 ) {
+			$max_depth = (int) get_option( 'thread_comments_depth', 5 );
+			if ( $max_depth < 1 ) {
+				$max_depth = 5;
+			}
+
+			// Считаем глубину parent-цепочки: parent=depth 1, его parent=2, и т.д.
+			// Защита от поврежденных данных (петля parent → самого себя или цикла):
+			// не больше $max_depth + 1 итераций.
+			$parent_depth = 1;
+			$cursor       = $parent_comment;
+			$guard        = 0;
+			while ( (int) $cursor->comment_parent > 0 && $guard < $max_depth + 1 ) {
+				$next = get_comment( (int) $cursor->comment_parent );
+				if ( ! $next ) {
+					break;
+				}
+				$parent_depth++;
+				$cursor = $next;
+				$guard++;
+			}
+
+			// Глубина нового коммента = parent_depth + 1.
+			if ( $parent_depth + 1 > $max_depth ) {
+				return new WP_Error(
+					'pickprism_too_deep',
+					__( 'Слишком глубокая вложенность. Ответьте на комментарий уровнем выше.', 'pickprism' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
 	}
 
 	// 7. Передаём в ядро через wp_handle_comment_submission. Оно делает duplicate/flood/moderation/disallowed.
-	// wp_handle_comment_submission читает из $_POST — нужно подложить.
-	$_POST['comment_post_ID'] = $post_id;
-	$_POST['author']          = $author;
-	$_POST['email']           = $email;
-	$_POST['url']             = '';
-	$_POST['comment']         = $content;
-	$_POST['comment_parent']  = $parent;
+	// wp_handle_comment_submission читает из $_POST — подкладываем, а в finally восстанавливаем,
+	// чтобы не протекать наружу глобальным стейтом при любом исходе (успех / WP_Error / исключение).
+	$post_backup = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing — сохраняем снимок для восстановления.
 
 	// Форсим анонимность — даже если админ залогинен.
 	$force_anon = static function ( array $data ): array {
-		$data['user_id']              = 0;
-		$data['user_ID']              = 0;
+		$data['user_id'] = 0;
 		return $data;
 	};
-	add_filter( 'preprocess_comment', $force_anon, 9 );
 
 	// wp_handle_comment_submission вызывает wp_die при ошибке — ловим через фильтр.
 	$die_handler = static function () {
@@ -477,33 +501,48 @@ function pickprism_rest_submit_comment( WP_REST_Request $request ) {
 			throw new RuntimeException( $msg !== '' ? $msg : __( 'Не удалось отправить комментарий.', 'pickprism' ) );
 		};
 	};
-	add_filter( 'wp_die_handler', $die_handler );
-	add_filter( 'wp_die_ajax_handler', $die_handler );
-	add_filter( 'wp_die_json_handler', $die_handler );
+
+	$submission_error = null;
+	$comment          = null;
 
 	try {
-		$comment = wp_handle_comment_submission(
-			array(
-				'comment_post_ID' => $post_id,
-				'author'          => $author,
-				'email'           => $email,
-				'url'             => '',
-				'comment'         => $content,
-				'comment_parent'  => $parent,
-			)
-		);
-	} catch ( \Throwable $e ) {
+		$_POST['comment_post_ID'] = $post_id;
+		$_POST['author']          = $author;
+		$_POST['email']           = $email;
+		$_POST['url']             = '';
+		$_POST['comment']         = $content;
+		$_POST['comment_parent']  = $parent;
+
+		add_filter( 'preprocess_comment', $force_anon, 9 );
+		add_filter( 'wp_die_handler', $die_handler );
+		add_filter( 'wp_die_ajax_handler', $die_handler );
+		add_filter( 'wp_die_json_handler', $die_handler );
+
+		try {
+			$comment = wp_handle_comment_submission(
+				array(
+					'comment_post_ID' => $post_id,
+					'author'          => $author,
+					'email'           => $email,
+					'url'             => '',
+					'comment'         => $content,
+					'comment_parent'  => $parent,
+				)
+			);
+		} catch ( \Throwable $e ) {
+			$submission_error = $e->getMessage();
+		}
+	} finally {
 		remove_filter( 'preprocess_comment', $force_anon, 9 );
 		remove_filter( 'wp_die_handler', $die_handler );
 		remove_filter( 'wp_die_ajax_handler', $die_handler );
 		remove_filter( 'wp_die_json_handler', $die_handler );
-		return new WP_Error( 'pickprism_submit_failed', $e->getMessage(), array( 'status' => 400 ) );
+		$_POST = $post_backup; // phpcs:ignore WordPress.Security.NonceVerification.Missing — восстанавливаем снимок.
 	}
 
-	remove_filter( 'preprocess_comment', $force_anon, 9 );
-	remove_filter( 'wp_die_handler', $die_handler );
-	remove_filter( 'wp_die_ajax_handler', $die_handler );
-	remove_filter( 'wp_die_json_handler', $die_handler );
+	if ( $submission_error !== null ) {
+		return new WP_Error( 'pickprism_submit_failed', $submission_error, array( 'status' => 400 ) );
+	}
 
 	if ( is_wp_error( $comment ) ) {
 		return new WP_Error(
@@ -551,13 +590,17 @@ function pickprism_rest_submit_comment( WP_REST_Request $request ) {
 /**
  * Рендерит один комментарий через наш callback (для AJAX insert).
  *
+ * Для AJAX-вставки точная глубина не критична — JS вставит элемент в нужный
+ * уровень DOM-дерева. Но нам важно попасть в ветку `depth > 1`, если parent
+ * есть, чтобы получить модификатор `comment-item--nested`.
+ *
  * @param WP_Comment $comment
  */
 function pickprism_render_single_comment( WP_Comment $comment ): string {
 	// Walker_Comment перед вызовом callback выставляет $GLOBALS['comment']; в AJAX-рендере
 	// делаем то же, иначе comment_ID()/get_comment_reply_link() работают с «прежним» комментом.
-	$prev                = $GLOBALS['comment'] ?? null;
-	$GLOBALS['comment']  = $comment;
+	$prev               = $GLOBALS['comment'] ?? null;
+	$GLOBALS['comment'] = $comment;
 
 	ob_start();
 	pickprism_comment_callback(
