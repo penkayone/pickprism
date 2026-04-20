@@ -92,3 +92,4 @@ pickprism/
 ## История
 
 - **2026-04-17** — Инициализация темы. Backend + frontend + REST + фикстуры + QA на 1000 постах. PR создан с ветки `feature/initial-theme`.
+- **2026-04-20** — Форма комментариев: ревью (reviewer / security / qa) прошло без blocker-ов. Уборка minor-находок (ветка `feature/comment-form`): удалён дублирующий `option_comment_registration`, добавлена валидация глубины reply против `thread_comments_depth`, убран мёртвый legacy-ключ `user_ID`, подкладывание `$_POST` + `wp_handle_comment_submission` обёрнуты в try/finally.
