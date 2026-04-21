@@ -35,10 +35,12 @@ pickprism/
 │   ├── caching.php                 Обёртки над transients
 │   ├── cleanup.php                 Отключение emoji, embeds, XML-RPC
 │   ├── security.php                Headers, nonce, escape/sanitize хелперы
+│   ├── theme-switcher.php          Переключатель визуальных вариантов (админ-бар)
 │   └── fixtures.php                WP-CLI команды для тестовых данных
 ├── assets/
-│   ├── src/scss/                   Исходники (abstracts/base/components)
-│   │   └── abstracts/_tokens.scss  ДИЗАЙН-ТОКЕНЫ (цвета, spacing, тени, радиусы) — править дизайн отсюда
+│   ├── src/scss/                   Исходники (abstracts/base/components/themes)
+│   │   ├── abstracts/_tokens.scss  ДИЗАЙН-ТОКЕНЫ (цвета, spacing, тени, радиусы) — править дизайн отсюда
+│   │   └── themes/                 Варианты дизайна — переопределения токенов под .theme-<slug>
 │   ├── src/js/                     main, search, infinite-scroll, animations
 │   └── dist/                       Скомпилированное (коммитится в git)
 ├── vite.config.js, package.json
@@ -64,6 +66,18 @@ pickprism/
 - Spacing scale: 4/8px
 - Все токены: `assets/src/scss/abstracts/_tokens.scss` ← править отсюда для дизайн-итераций
 - Ожидаются 1-3 итерации по дизайну (макета нет, делаем по референсу g2.com)
+
+### Варианты дизайна (design variants)
+
+Можно держать несколько визуальных вариантов параллельно и переключаться между ними:
+
+- Каждый вариант — файл `assets/src/scss/themes/_<slug>.scss`, всё внутри `.theme-<slug>` — только переопределения токенов + точечные правки компонентов. Разметку/логику не трогать.
+- Список вариантов — в `inc/theme-switcher.php → pickprism_theme_variants()`. Добавить новый: завести slug в списке + создать `_<slug>.scss` + подключить в `main.scss`.
+- Выбор хранится в user meta `pickprism_theme_variant` — персонально для юзера, посетителей не затрагивает.
+- Переключение — пункт «Design: …» в админ-баре (видят только пользователи с `edit_theme_options`).
+- Шрифты, уникальные для варианта, грузятся условно в `inc/enqueue.php` (см. Manrope для `pressaff`).
+
+Текущие варианты: `default` (основной), `pressaff` (тёплый оранжевый + Manrope + декор).
 
 ## Правила работы
 

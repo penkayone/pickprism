@@ -1,0 +1,251 @@
+// pressaff — тёмный хедер
+@use '../../abstracts/mixins' as *;
+
+.theme-pressaff {
+  .pa-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: var(--pa-dark);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: saturate(120%) blur(8px);
+    -webkit-backdrop-filter: saturate(120%) blur(8px);
+
+    &__inner {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-5);
+      min-height: 68px;
+      padding-block: var(--sp-3);
+    }
+
+    // ── Логотип ──────────────────────────────────────────────────────────
+    &__brand {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      text-decoration: none;
+      color: #fff;
+      font-family: var(--pa-font-display);
+      font-size: var(--fs-lg);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      transition: opacity var(--dur-fast) var(--ease-out);
+
+      &:hover { opacity: 0.85; }
+    }
+
+    &__logo-mark {
+      width: 36px;
+      height: 36px;
+      background: var(--pa-accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--pa-font-display);
+      font-weight: 800;
+      font-size: var(--fs-lg);
+      color: #fff;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    // ── Навигация ─────────────────────────────────────────────────────────
+    &__nav {
+      display: none;
+      flex: 1;
+
+      @include bp-md {
+        display: flex;
+        justify-content: center;
+      }
+    }
+
+    &__menu {
+      display: flex;
+      gap: var(--sp-5);
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      a {
+        font-size: var(--fs-sm);
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.65);
+        transition: color var(--dur-fast) var(--ease-out);
+        white-space: nowrap;
+
+        &:hover {
+          color: #fff;
+        }
+      }
+
+      .current-menu-item a {
+        color: var(--pa-accent);
+      }
+    }
+
+    // ── Правые действия ───────────────────────────────────────────────────
+    &__actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+
+    // Кнопка поиска (иконка)
+    &__search-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.7);
+      border: none;
+      cursor: pointer;
+      transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+      }
+
+      &[aria-expanded="true"] {
+        background: var(--pa-accent);
+        color: #fff;
+      }
+    }
+
+    // Telegram CTA
+    &__tg-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-4);
+      background: var(--pa-accent);
+      color: #fff;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+      white-space: nowrap;
+
+      &:hover {
+        background: var(--pa-accent-hover);
+        transform: translateY(-1px);
+      }
+
+      @include reduced-motion { &:hover { transform: none; } }
+    }
+
+    // ── Поисковый dropdown ────────────────────────────────────────────────
+    &__search-wrap {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--pa-dark-soft);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: var(--sp-4);
+      display: none;
+      z-index: var(--z-dropdown);
+
+      &.is-open { display: block; }
+
+      .search-form--md {
+        max-width: 640px;
+        margin-inline: auto;
+
+        .search-form__input {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.12);
+          color: #fff;
+
+          &::placeholder { color: rgba(255, 255, 255, 0.35); }
+
+          &:focus {
+            border-color: var(--pa-accent);
+            background: rgba(255, 255, 255, 0.12);
+          }
+        }
+
+        .search-form__icon { color: rgba(255, 255, 255, 0.4); }
+
+        .search-form__submit {
+          background: var(--pa-accent);
+          color: #fff;
+
+          &:hover { background: var(--pa-accent-hover); }
+        }
+
+        .search-form__dropdown {
+          background: var(--pa-dark);
+          border-color: rgba(255, 255, 255, 0.1);
+
+          a { color: rgba(255, 255, 255, 0.85); }
+        }
+      }
+    }
+
+    // ── Мобильный гамбургер ───────────────────────────────────────────────
+    &__burger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      border-radius: var(--radius-md);
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+
+      @include bp-md { display: none; }
+
+      &:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+    }
+
+    // ── Мобильный дравер ──────────────────────────────────────────────────
+    &__mobile-nav {
+      display: none;
+      background: var(--pa-dark-soft);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: var(--sp-4);
+
+      @include bp-md { display: none !important; }
+
+      &.is-open { display: block; }
+
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--sp-1);
+      }
+
+      a {
+        display: block;
+        padding: var(--sp-3) var(--sp-2);
+        color: rgba(255, 255, 255, 0.75);
+        font-size: var(--fs-base);
+        font-weight: 500;
+        border-radius: var(--radius-md);
+        transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.06);
+          color: #fff;
+        }
+      }
+
+      .current-menu-item a { color: var(--pa-accent); }
+    }
+  }
+}

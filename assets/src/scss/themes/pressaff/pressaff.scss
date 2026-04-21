@@ -1,0 +1,45 @@
+// pressaff design variant — main entry point.
+// Всё под .theme-pressaff — не протекает в дефолт.
+// @use правила ОБЯЗАНЫ идти первыми по правилам Dart Sass.
+
+@use 'header';
+@use 'hero';
+@use 'sections';
+@use 'footer';
+
+// ── Переопределение CSS-переменных (токенов) ─────────────────────────
+// Идёт ПОСЛЕ @use, потому что это обычные CSS-правила.
+.theme-pressaff {
+  // Оранжевая палитра
+  --c-accent: #ff7a1a;
+  --c-accent-hover: #e86a0c;
+  --c-accent-soft: #fff0e3;
+  --c-link: #ff7a1a;
+
+  // Тёмные тона (только для pressaff)
+  --pa-dark: #10131a;
+  --pa-dark-soft: #1a1f2b;
+
+  // Псевдонимы — внутри подфайлов используем --pa-* для читаемости
+  --pa-accent: #ff7a1a;
+  --pa-accent-hover: #e86a0c;
+  --pa-accent-soft: #fff0e3;
+
+  // Типографика — Manrope для заголовков
+  --pa-font-display: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  // Тёплые тени
+  --shadow-warm-sm: 0 4px 12px rgba(255, 122, 26, 0.08);
+  --shadow-warm-md: 0 10px 30px rgba(255, 122, 26, 0.08);
+  --shadow-warm-lg: 0 20px 48px rgba(255, 122, 26, 0.12);
+}
+
+// ── Базовая типографика внутри .theme-pressaff ────────────────────────
+.theme-pressaff {
+  h1, h2, h3, h4 {
+    font-family: var(--pa-font-display);
+    letter-spacing: -0.025em;
+  }
+
+  a { text-decoration: none; }
+}

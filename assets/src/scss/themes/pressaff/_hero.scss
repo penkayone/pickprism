@@ -1,0 +1,206 @@
+// pressaff — hero секция
+@use '../../abstracts/mixins' as *;
+
+.theme-pressaff {
+  .pa-hero {
+    position: relative;
+    background: var(--pa-dark);
+    overflow: hidden;
+    padding-block: var(--sp-10) var(--sp-11);
+
+    @include bp-md {
+      padding-block: var(--sp-11);
+    }
+
+    // Декоративный градиентный фон
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 60% 0%, rgba(255, 122, 26, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 10% 80%, rgba(255, 122, 26, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    // SVG-звёздочки через псевдоэлементы
+    &__decor {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    &__star {
+      position: absolute;
+      opacity: 0.3;
+
+      &--1 {
+        top: 14%;
+        right: 12%;
+        width: 28px;
+        height: 28px;
+        opacity: 0.45;
+        animation: pa-spin-slow 20s linear infinite;
+      }
+
+      &--2 {
+        top: 55%;
+        right: 6%;
+        width: 18px;
+        height: 18px;
+        opacity: 0.25;
+        animation: pa-spin-slow 28s linear infinite reverse;
+      }
+
+      &--3 {
+        top: 20%;
+        left: 5%;
+        width: 22px;
+        height: 22px;
+        opacity: 0.2;
+        animation: pa-spin-slow 22s linear infinite;
+      }
+
+      &--4 {
+        bottom: 20%;
+        left: 30%;
+        width: 14px;
+        height: 14px;
+        opacity: 0.15;
+      }
+    }
+
+    &__inner {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      text-align: center;
+      margin-inline: auto;
+    }
+
+    &__kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: 6px var(--sp-4);
+      background: rgba(255, 122, 26, 0.15);
+      color: var(--pa-accent);
+      border: 1px solid rgba(255, 122, 26, 0.25);
+      border-radius: var(--radius-full);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: var(--sp-5);
+
+      svg { flex-shrink: 0; }
+    }
+
+    &__title {
+      font-family: var(--pa-font-display);
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: var(--sp-4);
+
+      // Оранжевый акцент на части заголовка
+      em {
+        font-style: normal;
+        color: var(--pa-accent);
+      }
+    }
+
+    &__subtitle {
+      font-size: var(--fs-md);
+      line-height: var(--lh-relaxed);
+      color: rgba(255, 255, 255, 0.6);
+      max-width: 580px;
+      margin-inline: auto;
+      margin-bottom: var(--sp-8);
+    }
+
+    &__search {
+      max-width: 620px;
+      margin-inline: auto;
+
+      .search-form--lg {
+        .search-form__field {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: var(--radius-xl);
+          overflow: hidden;
+
+          &:focus-within {
+            border-color: var(--pa-accent);
+            background: rgba(255, 255, 255, 0.12);
+          }
+        }
+
+        .search-form__input {
+          background: transparent;
+          color: #fff;
+          font-size: var(--fs-base);
+
+          &::placeholder { color: rgba(255, 255, 255, 0.38); }
+        }
+
+        .search-form__icon { color: rgba(255, 255, 255, 0.4); }
+
+        .search-form__submit {
+          background: var(--pa-accent);
+          color: #fff;
+          font-weight: 600;
+          border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+          padding-inline: var(--sp-6);
+
+          &:hover { background: var(--pa-accent-hover); }
+        }
+
+        .search-form__dropdown {
+          background: var(--pa-dark-soft);
+          border-color: rgba(255, 255, 255, 0.1);
+          color: #fff;
+          border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+          margin-top: 2px;
+        }
+      }
+    }
+
+    &__stats {
+      display: flex;
+      justify-content: center;
+      gap: var(--sp-7);
+      margin-top: var(--sp-8);
+      flex-wrap: wrap;
+    }
+
+    &__stat {
+      text-align: center;
+
+      strong {
+        display: block;
+        font-family: var(--pa-font-display);
+        font-size: var(--fs-2xl);
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.025em;
+      }
+
+      span {
+        font-size: var(--fs-sm);
+        color: rgba(255, 255, 255, 0.45);
+      }
+    }
+  }
+
+  @keyframes pa-spin-slow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @include reduced-motion {
+    .pa-hero__star { animation: none !important; }
+  }
+}

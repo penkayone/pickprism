@@ -21,3 +21,7 @@
 @use 'components/comments';
 @use 'components/404' as error404;
 @use 'components/animations';
+
+// Варианты дизайна — активируются классом .theme-<slug> на <body>.
+// Подключать последними, чтобы переопределяли дефолт.
+@use 'themes/pressaff/pressaff';

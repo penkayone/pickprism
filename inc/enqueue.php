@@ -33,6 +33,19 @@ add_action(
 			null
 		);
 
+		// Дополнительный шрифт под активный вариант дизайна.
+		$variant = function_exists( 'pickprism_current_theme_variant' )
+			? pickprism_current_theme_variant()
+			: 'default';
+		if ( 'pressaff' === $variant ) {
+			wp_enqueue_style(
+				'pickprism-fonts-manrope',
+				'https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap',
+				array(),
+				null
+			);
+		}
+
 		wp_enqueue_style(
 			'pickprism-main',
 			PICKPRISM_URI . $css_rel,

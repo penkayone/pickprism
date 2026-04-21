@@ -50,5 +50,7 @@ pickprism_require_modules(
 		'ajax-search',
 		'comments',
 		'fixtures',
+		'theme-switcher',
+		'template-router',
 	)
 );
