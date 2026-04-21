@@ -1,17 +1,8 @@
 @use '../abstracts/tokens' as *;
 @use '../abstracts/mixins' as *;
 
-// Шрифт Inter подключается через Google Fonts (см. inc/enqueue.php — preconnect + preload).
-// Локальный self-host шрифта можно добавить позже: положить файл в assets/fonts/inter-variable.woff2
-// и раскомментировать блок @font-face ниже.
-//
-// @font-face {
-//   font-family: 'Inter';
-//   font-style: normal;
-//   font-weight: 400 700;
-//   font-display: swap;
-//   src: url('../../fonts/inter-variable.woff2') format('woff2-variations');
-// }
+// Manrope (headings) и Inter (body) подключаются через Google Fonts в inc/enqueue.php.
+// Self-host через @font-face можно подключить позже.
 
 html {
   font-size: 16px;
@@ -19,32 +10,36 @@ html {
 
 body {
   font-family: var(--font-sans);
-  font-size: var(--fs-base);
-  line-height: var(--lh-normal);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
   color: var(--c-text);
   background: var(--c-bg);
+  font-feature-settings: 'ss01', 'cv11';
 }
 
-h1, h2, h3, h4, h5 {
-  font-weight: var(--fw-semibold);
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-extrabold);
   line-height: var(--lh-tight);
   color: var(--c-text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 
-h1 { font-size: var(--fs-3xl); letter-spacing: -0.02em; }
-h2 { font-size: var(--fs-xl); }
-h3 { font-size: var(--fs-lg); }
-h4 { font-size: var(--fs-md); }
+h1 { font-size: var(--fs-3xl); letter-spacing: -0.035em; }
+h2 { font-size: var(--fs-2xl); }
+h3 { font-size: var(--fs-xl); }
+h4 { font-size: var(--fs-lg); }
+h5 { font-size: var(--fs-md); }
 
-@include bp-md {
+@include bp-lg {
   h1 { font-size: var(--fs-4xl); }
-  h2 { font-size: var(--fs-2xl); }
 }
 
 a {
-  color: var(--c-link);
+  color: var(--c-accent);
   transition: color var(--dur-fast) var(--ease-out);
+
   &:hover { color: var(--c-accent-hover); }
 }
 
@@ -56,17 +51,17 @@ code, pre, kbd, samp {
 }
 
 pre {
-  background: var(--c-bg-muted);
+  background: var(--c-bg-soft);
   padding: var(--sp-4);
   border-radius: var(--radius-md);
   overflow-x: auto;
+  border: 1px solid var(--c-border);
 }
 
 blockquote {
   border-left: 3px solid var(--c-accent);
   padding-left: var(--sp-4);
-  color: var(--c-text-muted);
-  font-style: italic;
+  color: var(--c-text-2);
 }
 
 hr {
