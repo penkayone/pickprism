@@ -112,7 +112,6 @@ function pickprism_rest_rate_limit( string $bucket, int $limit_per_minute ) {
 
 /**
  * Определяет клиентский IP, уважая типовые прокси-заголовки.
- * Не доверяем слепо X-Forwarded-For — берём первый IP из цепочки.
  */
 function pickprism_client_ip(): string {
 	$candidates = array();
@@ -139,9 +138,6 @@ function pickprism_client_ip(): string {
 
 /**
  * Поиск для dropdown.
- *
- * @param WP_REST_Request $request
- * @return WP_REST_Response
  */
 function pickprism_rest_search( WP_REST_Request $request ): WP_REST_Response {
 	$q     = trim( (string) $request->get_param( 'q' ) );
@@ -181,16 +177,12 @@ function pickprism_rest_search( WP_REST_Request $request ): WP_REST_Response {
 		)
 	);
 
-	// Маленький приватный кэш на стороне браузера.
 	$response->header( 'Cache-Control', 'private, max-age=30' );
 	return $response;
 }
 
 /**
  * Infinite scroll — догрузка следующей страницы ленты.
- *
- * @param WP_REST_Request $request
- * @return WP_REST_Response|WP_Error
  */
 function pickprism_rest_feed( WP_REST_Request $request ) {
 	$type     = (string) $request->get_param( 'type' );
@@ -203,7 +195,7 @@ function pickprism_rest_feed( WP_REST_Request $request ) {
 		'paged'               => $paged,
 		'post_status'         => 'publish',
 		'post_type'           => 'post',
-		'ignore_sticky_posts' => true, // sticky показываются только на первой странице
+		'ignore_sticky_posts' => true,
 		'no_found_rows'       => false,
 	);
 
@@ -245,11 +237,11 @@ function pickprism_rest_feed( WP_REST_Request $request ) {
 
 	$response = rest_ensure_response(
 		array(
-			'items'       => $items,
-			'paged'       => $paged,
-			'maxPages'    => (int) $wp_query->max_num_pages,
-			'hasMore'     => $paged < (int) $wp_query->max_num_pages,
-			'found'       => (int) $wp_query->found_posts,
+			'items'    => $items,
+			'paged'    => $paged,
+			'maxPages' => (int) $wp_query->max_num_pages,
+			'hasMore'  => $paged < (int) $wp_query->max_num_pages,
+			'found'    => (int) $wp_query->found_posts,
 		)
 	);
 	$response->header( 'Cache-Control', 'private, max-age=60' );
@@ -257,7 +249,8 @@ function pickprism_rest_feed( WP_REST_Request $request ) {
 }
 
 /**
- * Приводит WP_Post к структуре карточки.
+ * Приводит WP_Post к структуре карточки для JS.
+ * Расширено для редизайна: hue, readTime, primaryCategory, isNew.
  *
  * @param WP_Post $p
  * @return array<string,mixed>
@@ -293,14 +286,33 @@ function pickprism_post_to_card( WP_Post $p ): array {
 		}
 	}
 
+	// Новые поля редизайна.
+	$primary_term    = function_exists( 'pickprism_primary_category' ) ? pickprism_primary_category( (int) $p->ID ) : null;
+	$primary_payload = null;
+	if ( $primary_term instanceof WP_Term ) {
+		$primary_payload = array(
+			'id'   => (int) $primary_term->term_id,
+			'name' => $primary_term->name,
+			'slug' => $primary_term->slug,
+			'url'  => get_term_link( $primary_term ),
+		);
+	}
+	$hue       = function_exists( 'pickprism_cover_hue' ) ? pickprism_cover_hue( (int) $p->ID ) : 24;
+	$read_time = function_exists( 'pickprism_reading_time' ) ? pickprism_reading_time( (int) $p->ID ) : 1;
+	$is_new    = function_exists( 'pickprism_is_new' ) ? pickprism_is_new( (int) $p->ID ) : false;
+
 	return array(
-		'id'        => (int) $p->ID,
-		'title'     => html_entity_decode( wp_strip_all_tags( get_the_title( $p ) ), ENT_QUOTES, 'UTF-8' ),
-		'url'       => get_permalink( $p ),
-		'excerpt'   => wp_trim_words( wp_strip_all_tags( $p->post_excerpt ?: $p->post_content ), 28, '…' ),
-		'date'      => get_the_date( '', $p ),
-		'dateIso'   => get_the_date( 'c', $p ),
-		'tags'      => $tags_slim,
-		'thumbnail' => $thumb,
+		'id'              => (int) $p->ID,
+		'title'           => html_entity_decode( wp_strip_all_tags( get_the_title( $p ) ), ENT_QUOTES, 'UTF-8' ),
+		'url'             => get_permalink( $p ),
+		'excerpt'         => wp_trim_words( wp_strip_all_tags( $p->post_excerpt ?: $p->post_content ), 24, '…' ),
+		'date'            => get_the_date( 'j F', $p ),
+		'dateIso'         => get_the_date( 'c', $p ),
+		'tags'            => $tags_slim,
+		'thumbnail'       => $thumb,
+		'hue'             => (int) $hue,
+		'readTime'        => (int) $read_time,
+		'isNew'           => (bool) $is_new,
+		'primaryCategory' => $primary_payload,
 	);
 }

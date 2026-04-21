@@ -25,10 +25,10 @@ add_action(
 		$css_rel = 'assets/dist/css/main.css';
 		$js_rel  = 'assets/dist/js/main.js';
 
-		// Google Fonts — Inter 400..700 (можно заменить на self-hosted в assets/fonts/).
+		// Inter (body) + Manrope (display) — оба семейства одним запросом.
 		wp_enqueue_style(
 			'pickprism-fonts',
-			'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+			'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800;900&display=swap',
 			array(),
 			null
 		);
@@ -74,19 +74,13 @@ add_action(
 		);
 
 		// Штатный comment-reply.js нам не нужен — у нас свой обработчик в comments.js.
-		// Отменяем регистрацию на single, чтобы браузер не тянул лишний скрипт.
 		if ( is_singular() && comments_open() ) {
 			wp_dequeue_script( 'comment-reply' );
 			wp_deregister_script( 'comment-reply' );
 		}
 	},
-	20 // после ядра, чтобы dequeue comment-reply сработал.
+	20
 );
-
-/**
- * Гасим штатный wp_enqueue_scripts для threaded-replies — тема сама решает.
- * add_action на wp_default_scripts не нужен, достаточно dequeue выше.
- */
 
 /**
  * Preconnect для Google Fonts — чуть быстрее FCP.
@@ -108,7 +102,7 @@ add_filter(
 );
 
 /**
- * Ставим в <html> no-js → заменяем на has-js сразу в JS. Классика для прогрессивного UX.
+ * Дата-атрибут темы в <html> — для JS-feature detection.
  */
 add_filter(
 	'language_attributes',
@@ -127,7 +121,7 @@ function pickprism_feed_context(): array {
 		'type'    => 'home',
 		'value'   => '',
 		'paged'   => max( 1, (int) get_query_var( 'paged', 1 ) ),
-		'perPage' => (int) get_option( 'posts_per_page', 10 ),
+		'perPage' => (int) get_option( 'posts_per_page', 12 ),
 	);
 
 	if ( is_category() ) {
@@ -151,19 +145,3 @@ function pickprism_feed_context(): array {
 
 	return $ctx;
 }
-
-/**
- * Удаляет Emoji-скрипты ядра (не нужны, весят и тормозят).
- */
-add_action(
-	'init',
-	static function (): void {
-		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_print_styles', 'print_emoji_styles' );
-		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
-		remove_action( 'admin_print_styles', 'print_emoji_styles' );
-		remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
-		remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
-		remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
-	}
-);

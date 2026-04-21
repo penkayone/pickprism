@@ -1,5 +1,6 @@
-// Живой поиск: debounce + AbortController + dropdown с результатами.
-// Nonce заголовок X-WP-Nonce на случай работы поверх REST с авторизованной сессией.
+// Expanding search overlay (pressaff-style).
+// Кнопка-иконка в шапке раскрывает поле на всю ширину до логотипа.
+// Debounced live-поиск через REST /pickprism/v1/search. ESC/клик вне — закрывает.
 
 const cfg = () => (typeof window !== 'undefined' && window.Pickprism) || {};
 
@@ -14,7 +15,7 @@ const escape = (str) =>
 function renderItem(item) {
   const thumb = item.thumbnail
     ? `<span class="search-result__thumb"><img src="${escape(item.thumbnail)}" alt="" loading="lazy" decoding="async"></span>`
-    : '';
+    : '<span class="search-result__thumb"></span>';
   return `
     <a href="${escape(item.url)}" class="search-result" role="option">
       ${thumb}
@@ -26,7 +27,7 @@ function renderItem(item) {
   `;
 }
 
-function renderDropdown(dropdown, data, query) {
+function renderDropdown(dropdown, data) {
   const { i18n = {} } = cfg();
   if (!data || !data.items || data.items.length === 0) {
     dropdown.innerHTML = `<div class="search-empty">${escape(i18n.noResults || 'Ничего не найдено')}</div>`;
@@ -37,35 +38,90 @@ function renderDropdown(dropdown, data, query) {
     ? `<a class="search-view-all" href="${escape(data.viewAll)}">${escape(i18n.showAll || 'Показать все результаты')} →</a>`
     : '';
   dropdown.innerHTML = items + viewAll;
-  void query; // зарезервировано на случай подсветки.
 }
 
-function bindForm(form) {
+export function initSearch() {
+  const form = document.querySelector('[data-search]');
+  if (!form) return;
+
+  const header = document.querySelector('.pa-header');
+  const toggleBtn = document.querySelector('[data-search-toggle]');
+  const closeBtn = form.querySelector('[data-search-close]');
   const input = form.querySelector('[data-search-input]');
   const dropdown = form.querySelector('[data-search-dropdown]');
-  if (!input || !dropdown) return;
+
+  if (!toggleBtn || !input || !dropdown) return;
 
   const { restUrl, nonce, searchMinLen = 2, searchDebounce = 300, i18n = {} } = cfg();
-  if (!restUrl) return;
 
   let controller = null;
   let timer = 0;
+  let isOpen = false;
 
-  const close = () => {
+  const closeDropdown = () => {
     dropdown.hidden = true;
-    input.setAttribute('aria-expanded', 'false');
   };
-  const open = () => {
+  const openDropdown = () => {
     dropdown.hidden = false;
-    input.setAttribute('aria-expanded', 'true');
   };
+
+  const openSearch = () => {
+    if (isOpen) return;
+    isOpen = true;
+    form.classList.add('is-open');
+    form.setAttribute('aria-hidden', 'false');
+    input.setAttribute('tabindex', '0');
+    header && header.classList.add('pa-header--searching');
+    // Фокус на инпут — после анимации.
+    setTimeout(() => input.focus(), 260);
+  };
+
+  const closeSearch = () => {
+    if (!isOpen) return;
+    isOpen = false;
+    form.classList.remove('is-open');
+    form.setAttribute('aria-hidden', 'true');
+    input.setAttribute('tabindex', '-1');
+    header && header.classList.remove('pa-header--searching');
+    closeDropdown();
+    if (controller) controller.abort();
+  };
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    openSearch();
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeSearch();
+    });
+  }
+
+  // ESC закрывает.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) {
+      closeSearch();
+    }
+  });
+
+  // Клик вне form (но внутри header) — закрываем.
+  document.addEventListener('click', (e) => {
+    if (!isOpen) return;
+    if (form.contains(e.target)) return;
+    if (toggleBtn.contains(e.target)) return;
+    closeSearch();
+  });
+
+  if (!restUrl) return;
 
   const run = (query) => {
     if (controller) controller.abort();
     controller = new AbortController();
 
     dropdown.innerHTML = `<div class="search-loading">${escape(i18n.searching || 'Ищем…')}</div>`;
-    open();
+    openDropdown();
 
     const url = `${restUrl}search?q=${encodeURIComponent(query)}`;
     const headers = { Accept: 'application/json' };
@@ -76,7 +132,7 @@ function bindForm(form) {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
-      .then((data) => renderDropdown(dropdown, data, query))
+      .then((data) => renderDropdown(dropdown, data))
       .catch((err) => {
         if (err.name === 'AbortError') return;
         dropdown.innerHTML = `<div class="search-empty">${escape(i18n.errorGeneric || 'Ошибка')}</div>`;
@@ -89,31 +145,13 @@ function bindForm(form) {
 
     if (q.length < searchMinLen) {
       if (controller) controller.abort();
-      close();
+      closeDropdown();
       return;
     }
 
     timer = setTimeout(() => run(q), searchDebounce);
   });
 
-  input.addEventListener('focus', () => {
-    if (input.value.trim().length >= searchMinLen && dropdown.innerHTML.trim()) {
-      open();
-    }
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!form.contains(e.target)) close();
-  });
-
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      close();
-      input.blur();
-    }
-  });
-}
-
-export function initSearch() {
-  document.querySelectorAll('[data-search]').forEach(bindForm);
+  // Не даём отправить форму (используем live-поиск), но оставляем fallback для JS-off:
+  // без JS форма идёт на home_url с query ?s= — стандартный поиск WordPress.
 }

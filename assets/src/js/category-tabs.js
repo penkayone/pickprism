@@ -1,5 +1,6 @@
-// Infinite scroll ленты (редизайн ha-card). Подгружает след. страницу через
-// REST /pickprism/v1/feed. Без JS — работает классическая пагинация от PHP.
+// Category tabs на главной — фильтрация ленты через REST /pickprism/v1/feed.
+// Клик на таб → AJAX-подгрузка первой страницы → подмена ha-feed__grid.
+// Сбрасывает состояние infinite-scroll (через событие pickprism:feed-reset).
 
 const cfg = () => (typeof window !== 'undefined' && window.Pickprism) || {};
 
@@ -11,6 +12,7 @@ const escape = (str) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
+// Конвертер REST-item → HTML карточки (совпадает с infinite-scroll.js).
 function cardHTML(item) {
   const hue = typeof item.hue === 'number' ? item.hue : 24;
   const categoryName = item.primaryCategory ? item.primaryCategory.name : '';
@@ -63,44 +65,39 @@ function cardHTML(item) {
   `;
 }
 
-export function initInfiniteScroll() {
+export function initCategoryTabs() {
+  const tabs = document.querySelectorAll('[data-feed-tab]');
+  if (!tabs.length) return;
+
   const container = document.querySelector('[data-feed-container]');
   if (!container) return;
 
   const list = container.querySelector('[data-feed-list]');
-  const sentinel = container.querySelector('[data-feed-sentinel]');
-  const loadMoreBtn = container.querySelector('[data-feed-load-more]');
-  const status = container.querySelector('[data-feed-status]');
-  const linksBlock = container.querySelector('.pagination__links');
-
   if (!list) return;
 
   const { restUrl, feed, i18n = {} } = cfg();
   if (!restUrl || !feed) return;
 
-  let paged = (feed.paged || 1) + 1;
   let isLoading = false;
-  let ended = false;
-  let observer = null;
 
-  if (linksBlock) linksBlock.hidden = true;
-  if (sentinel) sentinel.hidden = false;
-  if (loadMoreBtn) loadMoreBtn.hidden = false;
-
-  const setStatus = (text) => {
-    if (status) status.textContent = text || '';
+  const activate = (btn) => {
+    tabs.forEach((t) => {
+      t.classList.remove('is-active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('is-active');
+    btn.setAttribute('aria-selected', 'true');
   };
 
-  const loadNext = () => {
-    if (isLoading || ended) return;
+  const loadTab = (type, value) => {
+    if (isLoading) return;
     isLoading = true;
-    setStatus(i18n.loading || 'Загружаем…');
-    if (loadMoreBtn) loadMoreBtn.disabled = true;
+    list.setAttribute('aria-busy', 'true');
 
     const params = new URLSearchParams({
-      type: (window.Pickprism && window.Pickprism.feed && window.Pickprism.feed.type) || feed.type || 'home',
-      value: (window.Pickprism && window.Pickprism.feed && window.Pickprism.feed.value) || feed.value || '',
-      paged: String(paged),
+      type,
+      value: value || '',
+      paged: '1',
       per_page: String(feed.perPage || 12),
     });
 
@@ -114,69 +111,39 @@ export function initInfiniteScroll() {
       })
       .then((data) => {
         const items = data.items || [];
-        if (items.length === 0 && !data.hasMore) {
-          ended = true;
-          setStatus(i18n.endOfFeed || 'Это все статьи');
-          if (loadMoreBtn) loadMoreBtn.hidden = true;
-          if (observer && sentinel) observer.unobserve(sentinel);
-          return;
+        list.innerHTML = items.length
+          ? items.map(cardHTML).join('')
+          : `<p class="empty-state__text">${escape(i18n.noResults || 'Ничего не найдено')}</p>`;
+
+        // Обновляем window.Pickprism.feed чтобы infinite-scroll знал текущий контекст.
+        if (window.Pickprism && window.Pickprism.feed) {
+          window.Pickprism.feed.type = type;
+          window.Pickprism.feed.value = value || '';
+          window.Pickprism.feed.paged = 1;
         }
 
-        const fragment = document.createDocumentFragment();
-        const holder = document.createElement('div');
-        holder.innerHTML = items.map(cardHTML).join('');
-        while (holder.firstChild) fragment.appendChild(holder.firstChild);
-        list.appendChild(fragment);
-
+        // Сигнал для infinite-scroll: сбросить paged и сенситель.
+        window.dispatchEvent(
+          new CustomEvent('pickprism:feed-reset', { detail: { type, value, hasMore: !!data.hasMore } })
+        );
         window.dispatchEvent(new CustomEvent('pickprism:reveal-refresh'));
-
-        paged += 1;
-        if (!data.hasMore) {
-          ended = true;
-          setStatus(i18n.endOfFeed || 'Это все статьи');
-          if (loadMoreBtn) loadMoreBtn.hidden = true;
-          if (observer && sentinel) observer.unobserve(sentinel);
-        } else {
-          setStatus('');
-        }
       })
       .catch(() => {
-        setStatus(i18n.errorGeneric || 'Ошибка');
+        list.innerHTML = `<p class="empty-state__text">${escape(i18n.errorGeneric || 'Ошибка')}</p>`;
       })
       .finally(() => {
         isLoading = false;
-        if (loadMoreBtn) loadMoreBtn.disabled = false;
+        list.removeAttribute('aria-busy');
       });
   };
 
-  if (loadMoreBtn) {
-    loadMoreBtn.addEventListener('click', loadNext);
-  }
-
-  if (sentinel && 'IntersectionObserver' in window) {
-    observer = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) loadNext();
-        }
-      },
-      { rootMargin: '400px 0px' }
-    );
-    observer.observe(sentinel);
-  }
-
-  // Category-tabs: при переключении сбрасываем paged и реактивируем sentinel.
-  window.addEventListener('pickprism:feed-reset', (e) => {
-    paged = 2;
-    ended = !(e.detail && e.detail.hasMore);
-    if (loadMoreBtn) loadMoreBtn.hidden = ended;
-    if (sentinel && observer) {
-      if (ended) {
-        observer.unobserve(sentinel);
-      } else {
-        observer.observe(sentinel);
-      }
-    }
-    setStatus(ended ? (i18n.endOfFeed || 'Это все статьи') : '');
+  tabs.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const type = btn.dataset.feedType || 'home';
+      const value = btn.dataset.feedValue || '';
+      activate(btn);
+      loadTab(type, value);
+    });
   });
 }
