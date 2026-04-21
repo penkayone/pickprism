@@ -1,13 +1,16 @@
+@use '../abstracts/tokens' as *;
 @use '../abstracts/mixins' as *;
 
+// ── Legacy .btn — оставляем для форм комментариев / 404 / базовых мест ──────
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--sp-2);
-  font-weight: var(--fw-medium);
-  font-size: var(--fs-sm);
-  padding: var(--sp-2) var(--sp-4);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  font-size: 14.5px;
+  padding: var(--sp-3) var(--sp-5);
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   transition:
@@ -15,7 +18,7 @@
     background-color var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
+    box-shadow var(--dur-base) var(--ease-out);
   line-height: 1.2;
   white-space: nowrap;
   user-select: none;
@@ -26,12 +29,14 @@
     background: var(--c-accent);
     color: #fff;
     border-color: var(--c-accent);
+    box-shadow: var(--shadow-accent-sm), inset 0 1px 0 rgba(255,255,255,0.2);
 
     &:hover {
       background: var(--c-accent-hover);
       border-color: var(--c-accent-hover);
       color: #fff;
-      box-shadow: var(--shadow-sm);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-accent-md), inset 0 1px 0 rgba(255,255,255,0.25);
     }
   }
 
@@ -55,7 +60,131 @@
   }
 
   &--lg {
-    font-size: var(--fs-base);
-    padding: var(--sp-3) var(--sp-5);
+    font-size: var(--fs-md);
+    padding: var(--sp-4) var(--sp-6);
+  }
+
+  @include reduced-motion {
+    &:hover { transform: none !important; }
+  }
+}
+
+// ── Pressaff button (article / hero) ───────────────────────────────────────
+.pa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  font-size: 14.5px;
+  letter-spacing: -0.005em;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+
+  &--accent {
+    background: var(--c-accent);
+    color: #fff;
+    box-shadow: var(--shadow-accent-sm), inset 0 1px 0 rgba(255,255,255,0.2);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity var(--dur-base) var(--ease-out);
+    }
+    &:hover {
+      background: var(--c-accent-hover);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-accent-md), inset 0 1px 0 rgba(255,255,255,0.25);
+      &::before { opacity: 1; }
+    }
+    &:active { transform: translateY(0); }
+  }
+
+  @include reduced-motion {
+    &:hover { transform: none !important; }
+  }
+}
+
+// ── Home (ha-) button ──────────────────────────────────────────────────────
+.ha-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 13px 20px;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  font-size: 15px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+
+  &--accent {
+    background: var(--c-accent);
+    color: #fff;
+
+    &:hover {
+      background: var(--c-accent-hover);
+      transform: translateY(-1px);
+      color: #fff;
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.35);
+      color: #fff;
+    }
+  }
+
+  @include reduced-motion {
+    &:hover { transform: none !important; }
+  }
+}
+
+// Icon button (article header) — квадрат 38×38.
+.pa-iconbtn {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--c-border);
+  color: var(--c-text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: var(--c-bg-soft);
+    border-color: var(--c-border-strong);
+    color: var(--c-text);
   }
 }
