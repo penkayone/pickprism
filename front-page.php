@@ -1,6 +1,7 @@
 <?php
 /**
- * Главная страница: hero + sticky + лента + sidebar.
+ * Главная страница (редизайн pressaff-style):
+ * hero-home → categories-section → main-with-sidebar [sticky + tabs + 2-col grid + sidebar] → popular-tags.
  *
  * @package Pickprism
  */
@@ -9,40 +10,47 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 
-$sticky_posts = pickprism_get_sticky_posts( 3 );
+$sticky_posts = pickprism_get_sticky_posts( 1 );
 $sticky_ids   = wp_list_pluck( $sticky_posts, 'ID' );
+$per_page     = (int) get_option( 'posts_per_page', 12 );
+$paged        = max( 1, (int) get_query_var( 'paged', 1 ) );
 ?>
 
-<?php get_template_part( 'template-parts/hero' ); ?>
+<?php get_template_part( 'template-parts/hero-home' ); ?>
 
-<main id="primary" class="site-main container">
-	<div class="layout-with-sidebar">
-		<div class="feed" data-feed-container>
+<div class="ha-container">
+	<?php get_template_part( 'template-parts/categories-section' ); ?>
+
+	<div class="ha-withside">
+		<section class="ha-feed" id="feed" data-feed-container>
+			<div class="ha-sec-head">
+				<h2 class="ha-sec-head__title"><?php esc_html_e( 'Лента материалов', 'pickprism' ); ?></h2>
+				<span class="ha-sec-head__line" aria-hidden="true"></span>
+				<?php get_template_part( 'template-parts/feed-tabs' ); ?>
+			</div>
 
 			<?php if ( ! empty( $sticky_posts ) ) : ?>
-				<section class="feed__sticky" aria-label="<?php esc_attr_e( 'Закреплённые статьи', 'pickprism' ); ?>">
-					<?php foreach ( $sticky_posts as $sp ) : ?>
-						<?php
-						get_template_part(
-							'template-parts/card-article-sticky',
-							null,
-							array( 'post' => $sp )
-						);
-						?>
-					<?php endforeach; ?>
-				</section>
+				<?php
+				foreach ( $sticky_posts as $sp ) :
+					get_template_part(
+						'template-parts/card-article-sticky',
+						null,
+						array( 'post' => $sp )
+					);
+				endforeach;
+				?>
 			<?php endif; ?>
 
-			<section class="feed__list" data-feed-list>
+			<div class="ha-feed__grid" data-feed-list>
 				<?php
 				$feed_query = new WP_Query(
 					array(
 						'post_status'         => 'publish',
 						'post_type'           => 'post',
-						'posts_per_page'      => (int) get_option( 'posts_per_page', 10 ),
+						'posts_per_page'      => $per_page,
 						'ignore_sticky_posts' => true,
 						'post__not_in'        => $sticky_ids,
-						'paged'               => max( 1, (int) get_query_var( 'paged', 1 ) ),
+						'paged'               => $paged,
 					)
 				);
 
@@ -56,20 +64,25 @@ $sticky_ids   = wp_list_pluck( $sticky_posts, 'ID' );
 					echo '<p class="empty-state__text">' . esc_html__( 'Пока нет публикаций.', 'pickprism' ) . '</p>';
 				endif;
 				?>
-			</section>
+			</div>
 
 			<?php
+			// Pagination + sentinel для infinite-scroll.
 			get_template_part(
 				'template-parts/pagination',
 				null,
 				array( 'query' => $feed_query )
 			);
 			?>
-		</div>
+
+			<div class="ha-sentinel" data-feed-sentinel aria-hidden="true"></div>
+		</section>
 
 		<?php get_sidebar(); ?>
 	</div>
-</main>
+
+	<?php get_template_part( 'template-parts/popular-tags' ); ?>
+</div>
 
 <?php
 get_footer();

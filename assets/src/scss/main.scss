@@ -1,4 +1,4 @@
-// Pickprism — главный SCSS вход.
+// Pickprism — главный SCSS вход (редизайн pressaff-style).
 // Порядок важен: токены → ресет → типографика → лэйаут → компоненты.
 
 @use 'abstracts/tokens';
@@ -8,16 +8,27 @@
 @use 'base/typography';
 @use 'base/layout';
 
+// Базовые компоненты (header/footer/buttons).
 @use 'components/header';
 @use 'components/buttons';
+@use 'components/footer';
+
+// Home-компоненты (hero, категории, табы, карточки, sidebar, теги).
 @use 'components/hero';
-@use 'components/chips';
-@use 'components/search-form';
+@use 'components/categories-section';
+@use 'components/feed-tabs';
 @use 'components/card';
 @use 'components/sidebar';
-@use 'components/footer';
-@use 'components/pagination';
+@use 'components/popular-tags';
+
+// Article (single) — статья и её элементы.
 @use 'components/article';
+@use 'components/reading-progress';
 @use 'components/comments';
+
+// Прочее (legacy).
+@use 'components/chips';
+@use 'components/search-form';
+@use 'components/pagination';
 @use 'components/404' as error404;
 @use 'components/animations';

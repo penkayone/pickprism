@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 ?>
-<main id="primary" class="site-main container">
+<div class="ha-container">
 	<header class="page-header">
 		<h1 class="page-header__title">
 			<?php
@@ -17,29 +17,28 @@ get_header();
 			echo esc_html( sprintf( __( 'Поиск: %s', 'pickprism' ), get_search_query() ) );
 			?>
 		</h1>
-		<?php get_template_part( 'template-parts/search-form' ); ?>
 	</header>
 
-	<div class="layout-with-sidebar">
-		<div class="feed" data-feed-container>
-			<section class="feed__list" data-feed-list>
-				<?php
-				if ( have_posts() ) :
+	<div class="ha-withside">
+		<section class="ha-feed" id="feed" data-feed-container>
+			<?php if ( have_posts() ) : ?>
+				<div class="ha-feed__grid" data-feed-list>
+					<?php
 					while ( have_posts() ) :
 						the_post();
 						get_template_part( 'template-parts/card-article' );
 					endwhile;
-				else :
-					echo '<p class="empty-state__text">' . esc_html__( 'Ничего не найдено. Попробуйте другой запрос.', 'pickprism' ) . '</p>';
-				endif;
-				?>
-			</section>
+					?>
+				</div>
 
-			<?php get_template_part( 'template-parts/pagination' ); ?>
-		</div>
+				<?php get_template_part( 'template-parts/pagination' ); ?>
+			<?php else : ?>
+				<p class="empty-state__text"><?php esc_html_e( 'Ничего не найдено. Попробуйте другой запрос.', 'pickprism' ); ?></p>
+			<?php endif; ?>
+		</section>
 
 		<?php get_sidebar(); ?>
 	</div>
-</main>
+</div>
 <?php
 get_footer();

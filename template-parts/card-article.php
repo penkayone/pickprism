@@ -1,66 +1,57 @@
 <?php
 /**
- * Карточка статьи: теги → H2 → картинка → excerpt.
- * Используется в ленте и для AJAX-результатов (вызывается из PHP или рендерится JS).
+ * Карточка статьи в ленте (редизайн): cover → meta (date + read-time + «Новое») → title → excerpt.
+ * Cover либо featured image, либо hue-градиент + первая буква категории.
  *
  * @package Pickprism
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$post_id = get_the_ID();
-$tags    = get_the_terms( $post_id, 'post_tag' );
-$tags    = is_array( $tags ) ? array_slice( $tags, 0, 3 ) : array();
+$post_id      = get_the_ID();
+$primary_term = pickprism_primary_category( $post_id );
+$hue          = pickprism_cover_hue( $post_id );
+$category_label = $primary_term ? $primary_term->name : '';
+$is_new       = pickprism_is_new( $post_id );
+$read_time    = pickprism_reading_time( $post_id );
 ?>
-<article
+<a
 	id="post-<?php the_ID(); ?>"
-	<?php post_class( 'card card--article reveal' ); ?>
+	class="ha-card reveal"
+	href="<?php the_permalink(); ?>"
 	data-post-id="<?php echo esc_attr( (string) $post_id ); ?>"
 >
-	<?php if ( ! empty( $tags ) ) : ?>
-		<div class="card__tags">
-			<?php foreach ( $tags as $tag ) :
-				$link = get_term_link( $tag );
-				if ( is_wp_error( $link ) ) {
-					continue;
-				}
+	<?php pickprism_render_cover( $post_id, 'md' ); ?>
+
+	<div class="ha-card__body">
+		<div class="ha-card__meta">
+			<?php if ( $is_new ) : ?>
+				<span class="ha-card__new"><?php esc_html_e( 'Новое', 'pickprism' ); ?></span>
+			<?php endif; ?>
+			<span class="ha-card__date">
+				<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>">
+					<?php echo esc_html( get_the_date( 'j F', $post_id ) ); ?>
+				</time>
+			</span>
+			<span class="ha-card__dot" aria-hidden="true">·</span>
+			<span class="ha-card__read">
+				<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+				<?php
+				/* translators: %d: минуты чтения */
+				echo esc_html( sprintf( __( '%d мин', 'pickprism' ), $read_time ) );
 				?>
-				<a class="chip chip--tag chip--sm" href="<?php echo esc_url( $link ); ?>">
-					#<?php echo esc_html( $tag->name ); ?>
-				</a>
-			<?php endforeach; ?>
+			</span>
 		</div>
-	<?php endif; ?>
 
-	<h2 class="card__title">
-		<a href="<?php the_permalink(); ?>" rel="bookmark">
-			<?php the_title(); ?>
-		</a>
-	</h2>
+		<h3 class="ha-card__title"><?php echo esc_html( get_the_title() ); ?></h3>
 
-	<?php if ( has_post_thumbnail() ) : ?>
-		<a class="card__media" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true">
-			<?php
-			the_post_thumbnail(
-				'pickprism-card',
-				array(
-					'loading'  => 'lazy',
-					'decoding' => 'async',
-					'class'    => 'card__img',
-					'alt'      => the_title_attribute( array( 'echo' => false ) ),
-				)
-			);
+		<?php
+		$excerpt = get_the_excerpt();
+		if ( $excerpt ) :
 			?>
-		</a>
-	<?php endif; ?>
-
-	<div class="card__excerpt">
-		<?php echo esc_html( wp_trim_words( wp_strip_all_tags( get_the_excerpt() ), 28, '…' ) ); ?>
+			<p class="ha-card__excerpt">
+				<?php echo esc_html( wp_trim_words( wp_strip_all_tags( $excerpt ), 24, '…' ) ); ?>
+			</p>
+		<?php endif; ?>
 	</div>
-
-	<div class="card__meta">
-		<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>">
-			<?php echo esc_html( get_the_date() ); ?>
-		</time>
-	</div>
-</article>
+</a>

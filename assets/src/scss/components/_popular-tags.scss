@@ -1,0 +1,62 @@
+@use '../abstracts/tokens' as *;
+@use '../abstracts/mixins' as *;
+
+// Секция «Популярные теги» внизу home.
+.ha-tags {
+  margin-top: 80px;
+
+  @include bp-down-md2 {
+    margin-top: var(--sp-10);
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+.ha-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-full);
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  font-size: 14px;
+  color: var(--c-text);
+  text-decoration: none;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+
+  &__hash {
+    color: var(--c-accent);
+    font-weight: var(--fw-extrabold);
+  }
+
+  &__n {
+    color: var(--c-text-subtle);
+    font-weight: var(--fw-medium);
+    font-size: 12px;
+  }
+
+  &:hover {
+    background: var(--c-dark-2);
+    color: #fff;
+    border-color: var(--c-dark-2);
+    transform: translateY(-1px);
+  }
+
+  &:hover .ha-tag__hash { color: var(--c-accent); }
+  &:hover .ha-tag__n { color: rgba(255, 255, 255, 0.6); }
+
+  @include reduced-motion {
+    &:hover { transform: none; }
+  }
+}
