@@ -76,7 +76,7 @@
   strong { color: var(--c-text); font-weight: 650; }
   em { font-style: italic; color: var(--c-text); }
 
-  a {
+  :where(p, li, blockquote, td, th) a {
     color: var(--c-accent);
     text-decoration: underline;
     text-underline-offset: 3px;
