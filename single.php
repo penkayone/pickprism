@@ -18,6 +18,20 @@ while ( have_posts() ) :
 
 	<main id="primary" class="pa-container pa-main pa-main--with-sidebar">
 		<article id="article-body" <?php post_class( 'pa-article' ); ?>>
+			<?php if ( has_post_thumbnail() ) : ?>
+				<figure class="pa-article__cover">
+					<?php the_post_thumbnail(
+						'pickprism-hero',
+						array(
+							'class'    => 'pa-article__cover-img',
+							'loading'  => 'eager',
+							'decoding' => 'async',
+							'alt'      => esc_attr( get_the_title() ),
+						)
+					); ?>
+				</figure>
+			<?php endif; ?>
+
 			<?php the_content(); ?>
 
 			<?php // get_template_part( 'template-parts/author-block' ); ?>

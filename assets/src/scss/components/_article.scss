@@ -41,6 +41,23 @@
     }
   }
 
+  &__cover {
+    margin: 0 0 32px;
+    border-radius: 16px;
+    overflow: hidden;
+
+    @include bp-down-md2 {
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+  }
+
+  &__cover-img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
   h2 {
     font-family: var(--font-display);
     font-size: clamp(24px, 2.6vw, 30px);
