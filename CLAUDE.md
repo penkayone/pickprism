@@ -1,6 +1,6 @@
 # pickprism — WordPress theme
 
-Блог-тема для сайта pickprism (1000+ статей). Редизайн 2026-04-21 в стиле pressaff: тёплый оранжевый акцент + Manrope/Inter, секция категорий + расширенный sidebar на 6 блоков, article-страница с full-bleed hero, TL;DR/callouts/pullquote, mobile share bar, progress-bar чтения.
+Блог-тема для сайта pickprism (1000+ статей). Редизайн 2026-04-21 в стиле pressaff: тёплый оранжевый акцент + Manrope/Inter, расширенный sidebar на 5 блоков, article-страница с full-bleed hero, TL;DR/callouts/pullquote, mobile share bar, progress-bar чтения.
 
 ## Стек
 
@@ -27,10 +27,8 @@ pickprism/
 ├── *.php                                   Шаблоны: front-page, home, single, archive, category, tag, search, 404, header, footer, sidebar, index
 ├── template-parts/                         Переиспользуемые блоки:
 │   ├── hero-home.php / hero-article.php    (тёмный centered home / full-bleed single)
-│   ├── categories-section.php              (6 плиток-иконок на home перед лентой)
-│   ├── feed-tabs.php                       (табы над лентой: Все + 4 категории)
 │   ├── card-article.php / card-article-sticky.php  (обычная / wide-sticky карточки)
-│   ├── sidebar-categories / -trending / -telegram / -newsletter / -authors / -tags.php
+│   ├── sidebar-categories / -trending / -newsletter / -authors / -tags.php
 │   ├── popular-tags.php                    (pill-секция внизу home)
 │   ├── author-block / prev-next / related / share-horizontal / mobile-share-bar / reading-progress.php
 │   ├── pagination.php
@@ -50,8 +48,8 @@ pickprism/
 ├── assets/
 │   ├── src/scss/
 │   │   ├── abstracts/_tokens.scss          ДИЗАЙН-ТОКЕНЫ (orange accent, Manrope + Inter) — править дизайн отсюда
-│   │   └── components/                     header, hero, card, sidebar, article, comments, footer, categories-section, feed-tabs, popular-tags, reading-progress, buttons, pagination, animations, 404, search-form, chips
-│   ├── src/js/                             main, search, infinite-scroll, animations, comments, reading-progress, category-tabs
+│   │   └── components/                     header, hero, card, sidebar, article, comments, footer, popular-tags, reading-progress, buttons, pagination, animations, 404, search-form, chips
+│   ├── src/js/                             main, search, infinite-scroll, animations, comments, reading-progress
 │   └── dist/                               Скомпилированное (коммитится в git)
 ├── vite.config.js, package.json
 └── README.md
@@ -108,7 +106,7 @@ pickprism/
 
 - LCP < 1.5s, CLS < 0.1, TBT < 200ms
 - Lighthouse Performance ≥ 85 на mobile с 1000 постами
-- Бандл (после редизайна 2026-04-21): **CSS ~84 KB (gzip ~14.6 KB), JS ~17 KB (gzip ~5.2 KB)**
+- Бандл (после чистки sidebar-telegram 2026-04-29): **CSS ~80 KB (gzip ~14.1 KB), JS ~13 KB (gzip ~4.7 KB)**
 
 ## Что не сделано (TODO)
 
@@ -118,10 +116,14 @@ pickprism/
 - [ ] Шорткоды для TL;DR / callouts / pullquote / inline-CTA (стили готовы, шорткодов нет — см. TECH_DEBT)
 - [ ] Интеграция newsletter-формы (сейчас `onsubmit="return false"`)
 - [ ] WP-CLI команда `backfill-reading-time` для бэкфилла меты на старые посты
-- [ ] Реальные значения Telegram-subs / posts_per_week (фильтры `pickprism_telegram_*`)
 
 ## История
 
 - **2026-04-17** — Инициализация темы. Backend + frontend + REST + фикстуры + QA на 1000 постах. PR создан с ветки `feature/initial-theme`.
 - **2026-04-20** — Форма комментариев: ревью (reviewer / security / qa) прошло без blocker-ов. Уборка minor-находок (ветка `feature/comment-form`): удалён дублирующий `option_comment_registration`, добавлена валидация глубины reply против `thread_comments_depth`, убран мёртвый legacy-ключ `user_ID`, подкладывание `$_POST` + `wp_handle_comment_submission` обёрнуты в try/finally.
-- **2026-04-21** — Полный редизайн в стиле pressaff (ветка `feature/redesign`). Замена токенов на orange-warm палитру + Manrope/Inter. Переписаны header (sticky + expanding search), footer (тёмный 2-col), home (hero-home → categories-section → feed-tabs → sticky + ha-card grid → единый sidebar на 6 блоков → popular-tags), article (hero-full-bleed → article-body с TL;DR/callouts/quote/inline-CTA → author-block → prev-next → related → horizontal-share → mobile-share-bar + reading-progress), comments (pa-comment / pa-reply + thread-линия + бейдж «Автор»). Новый backend-модуль `inc/template-helpers.php` с hue-helpers, reading-time (с post_meta-кэшем), is-new (7 дней), render_cover, authors_of_the_week (transient 6ч). REST `/feed` расширен полями hue/readTime/isNew/primaryCategory. JS: новые `reading-progress.js` + `category-tabs.js`, `search.js` переписан под expanding overlay. PICKPRISM_VERSION → 1.1.0.
+- **2026-04-21** — Полный редизайн в стиле pressaff (ветка `feature/redesign`). Замена токенов на orange-warm палитру + Manrope/Inter. Переписаны header (sticky + expanding search), footer (тёмный 2-col), home (hero-home → sticky + ha-card grid → единый sidebar на 6 блоков → popular-tags), article (hero-full-bleed → article-body с TL;DR/callouts/quote/inline-CTA → author-block → prev-next → related → horizontal-share → mobile-share-bar + reading-progress), comments (pa-comment / pa-reply + thread-линия + бейдж «Автор»). Новый backend-модуль `inc/template-helpers.php` с hue-helpers, reading-time (с post_meta-кэшем), is-new (7 дней), render_cover, authors_of_the_week (transient 6ч). REST `/feed` расширен полями hue/readTime/isNew/primaryCategory. JS: новый `reading-progress.js`, `search.js` переписан под expanding overlay. PICKPRISM_VERSION → 1.1.0.
+- **2026-04-29** — Чистка дублей на главной и в sidebar (ветка `feature/redesign`):
+  - Удалены **feed-tabs** (категорийные табы над лентой): `template-parts/feed-tabs.php`, `assets/src/scss/components/_feed-tabs.scss`, `assets/src/js/category-tabs.js`, импорты в `main.js` / `main.scss`, мёртвый листенер `pickprism:feed-reset` в `infinite-scroll.js`. Фильтр по категориям остаётся на `/category/{slug}/`.
+  - Удалена **секция категорий** с главной (дублировала `sidebar-categories`): `template-parts/categories-section.php`, `assets/src/scss/components/_categories-section.scss`, `@use` в `main.scss`, вызов `get_template_part()` в `front-page.php`. Хелперы `pickprism_get_top_categories` и `pickprism_term_hue` сохранены — используются в header / footer / sidebar-categories / hero (legacy).
+  - Удалён **sidebar-telegram** (дублировал TG-ссылки в header/footer): `template-parts/sidebar-telegram.php`, секция `.ha-side__tg*` в `_sidebar.scss`, `.ha-side__tg` из группового селектора `bp-down-xl`. Фильтры `pickprism_telegram_url/subs/posts_per_week` удалены вместе с шаблоном (нигде не были зарегистрированы через `add_filter`). Sidebar теперь на 5 блоков: categories / trending / newsletter / authors / tags.
+  - Структура главной: hero-home → feed (sticky + сетка) + sidebar (5 блоков) → popular-tags.

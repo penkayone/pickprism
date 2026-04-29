@@ -6,7 +6,6 @@ import { initInfiniteScroll } from './infinite-scroll.js';
 import { initRevealAnimations } from './animations.js';
 import { initComments } from './comments.js';
 import { initReadingProgress } from './reading-progress.js';
-import { initCategoryTabs } from './category-tabs.js';
 
 const ready = (fn) => {
   if (document.readyState !== 'loading') {
@@ -29,11 +28,6 @@ ready(() => {
   // Лента / infinite scroll — только если на странице есть feed-container.
   if (document.querySelector('[data-feed-container]')) {
     initInfiniteScroll();
-  }
-
-  // Category tabs — только на home (элемент есть только там).
-  if (document.querySelector('[data-feed-tab]')) {
-    initCategoryTabs();
   }
 
   // Reading progress — только на single post.

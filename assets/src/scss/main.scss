@@ -13,10 +13,8 @@
 @use 'components/buttons';
 @use 'components/footer';
 
-// Home-компоненты (hero, категории, табы, карточки, sidebar, теги).
+// Home-компоненты (hero, карточки, sidebar, теги).
 @use 'components/hero';
-@use 'components/categories-section';
-@use 'components/feed-tabs';
 @use 'components/card';
 @use 'components/sidebar';
 @use 'components/popular-tags';

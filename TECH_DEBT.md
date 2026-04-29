@@ -67,31 +67,16 @@
 
 ---
 
-## Sidebar-telegram и sidebar-newsletter — реальные интеграции
+## Sidebar-newsletter — реальная интеграция
 
-**Где:** `template-parts/sidebar-telegram.php`, `template-parts/sidebar-newsletter.php`
+**Где:** `template-parts/sidebar-newsletter.php`
 
-**Что есть сейчас.**
-- Telegram: только ссылка на `https://t.me/` и фильтры `pickprism_telegram_url/subs/posts_per_week` — без реальных цифр.
-- Newsletter: форма с `action="#"` + `onsubmit="return false"` — не отправляет никуда.
+**Что есть сейчас.** Форма с `action="#"` + `onsubmit="return false"` — не отправляет никуда.
 
-**Что сделать.** Либо настроить фильтры через functions.php / плагин (для Telegram), либо интегрировать с newsletter-сервисом (Mailchimp API / Sendgrid).
+**Что сделать.** Интегрировать с newsletter-сервисом (Mailchimp API / Sendgrid) либо подключить плагин подписки.
 
-**Оценка:** 1-2 часа (newsletter), 5 минут (telegram — filter values).
-**Приоритет:** medium. Пока CTA есть, но без бэкенда они декоративные.
-
----
-
-## Category-tabs: fallback при отсутствии JS
-
-**Где:** `template-parts/feed-tabs.php`, `assets/src/js/category-tabs.js`
-
-**Что есть сейчас.** Табы — `<button>`, переключаются JS. Без JS переключения нет.
-
-**Что сделать.** Если критично — заменить на `<a>` с href на `/category/{slug}/`, а JS перехватывает клик и подменяет через REST для избежания перезагрузки.
-
-**Оценка:** 20 минут.
-**Приоритет:** low. Большинство пользователей с JS.
+**Оценка:** 1-2 часа.
+**Приоритет:** medium. CTA есть, но без бэкенда декоративный.
 
 ---
 

@@ -164,19 +164,4 @@ export function initInfiniteScroll() {
     );
     observer.observe(sentinel);
   }
-
-  // Category-tabs: при переключении сбрасываем paged и реактивируем sentinel.
-  window.addEventListener('pickprism:feed-reset', (e) => {
-    paged = 2;
-    ended = !(e.detail && e.detail.hasMore);
-    if (loadMoreBtn) loadMoreBtn.hidden = ended;
-    if (sentinel && observer) {
-      if (ended) {
-        observer.unobserve(sentinel);
-      } else {
-        observer.observe(sentinel);
-      }
-    }
-    setStatus(ended ? (i18n.endOfFeed || 'Это все статьи') : '');
-  });
 }

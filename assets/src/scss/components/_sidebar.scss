@@ -2,8 +2,8 @@
 @use '../abstracts/mixins' as *;
 
 // ══════════════════════════════════════════════════════════════════════════
-// Единый sidebar на 6 блоков (categories, trending, telegram, newsletter,
-// authors, tags). Используется и на home, и на single.
+// Единый sidebar на 5 блоков (categories, trending, newsletter, authors,
+// tags). Используется и на home, и на single.
 // Sticky top: 24px, скрывается на ≤960 (на single).
 // ══════════════════════════════════════════════════════════════════════════
 .ha-side {
@@ -30,8 +30,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 
-    // Ключевые CTA-блоки отдельной строкой — оставляем на span 1.
-    .ha-side__tg,
+    // Ключевой CTA-блок отдельной строкой — оставляем на span 1.
     .ha-side__nl { grid-column: span 1; }
   }
 
@@ -243,104 +242,6 @@
   font-family: var(--font-sans);
   font-size: 11px;
   color: var(--c-text-subtle);
-}
-
-// ── Telegram CTA ──────────────────────────────────────────────────────────
-.ha-side__tg {
-  background: linear-gradient(140deg, #229ED9 0%, #0088cc 100%);
-  border-color: transparent;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -40% -40% auto auto;
-    width: 220px;
-    height: 220px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 70%);
-    pointer-events: none;
-  }
-
-  &-ico {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-lg);
-    background: rgba(255, 255, 255, 0.18);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    margin-bottom: 14px;
-  }
-
-  &-title {
-    font-family: var(--font-display);
-    font-weight: var(--fw-extrabold);
-    font-size: 20px;
-    letter-spacing: -0.01em;
-    margin-bottom: 6px;
-  }
-
-  &-text {
-    font-family: var(--font-sans);
-    font-size: 13.5px;
-    color: rgba(255, 255, 255, 0.85);
-    line-height: 1.5;
-    margin-bottom: 16px;
-  }
-
-  &-stat {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    padding: 12px 0;
-    margin-bottom: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-
-    > div { display: flex; flex-direction: column; }
-
-    b {
-      font-family: var(--font-display);
-      font-weight: var(--fw-black);
-      font-size: 20px;
-      letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
-    }
-
-    span {
-      font-family: var(--font-sans);
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.75);
-    }
-  }
-
-  &-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    padding: 12px 18px;
-    background: #fff;
-    color: #0088cc;
-    font-family: var(--font-sans);
-    font-weight: var(--fw-bold);
-    font-size: 14px;
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition:
-      transform var(--dur-fast) var(--ease-out),
-      box-shadow var(--dur-fast) var(--ease-out);
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      color: #0088cc;
-    }
-  }
 }
 
 // ── Newsletter ────────────────────────────────────────────────────────────
