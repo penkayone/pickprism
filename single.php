@@ -20,7 +20,7 @@ while ( have_posts() ) :
 		<article id="article-body" <?php post_class( 'pa-article' ); ?>>
 			<?php the_content(); ?>
 
-			<?php get_template_part( 'template-parts/author-block' ); ?>
+			<?php // get_template_part( 'template-parts/author-block' ); ?>
 			<?php get_template_part( 'template-parts/prev-next' ); ?>
 
 			<?php

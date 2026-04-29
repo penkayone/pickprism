@@ -10,11 +10,9 @@
  * - pickprism_reading_time         — минуты чтения (с кэшем в post_meta).
  * - pickprism_is_new               — опубликован ли пост за последние 7 дней.
  * - pickprism_render_cover         — единая разметка обложки карточки.
- * - pickprism_authors_of_the_week  — топ-N авторов недели с transient-кэшем.
  *
  * Хуки:
- * - save_post → пересчёт _pickprism_reading_time и инвалидация pickprism_authors_week.
- * - deleted_user → инвалидация pickprism_authors_week.
+ * - save_post → пересчёт _pickprism_reading_time.
  *
  * @package Pickprism
  */
@@ -254,69 +252,3 @@ function pickprism_render_cover( int $post_id, string $size = 'md' ): void {
 
 	echo '</div>';
 }
-
-// ════════════════════════════════════════════════════════════════════════════
-// Authors of the week (transient-кэш 6ч)
-// ════════════════════════════════════════════════════════════════════════════
-
-/**
- * Топ-N авторов с наибольшим post_count. Кэш в transient pickprism_authors_week.
- *
- * @param int $limit
- * @return WP_User[]
- */
-function pickprism_authors_of_the_week( int $limit = 4 ): array {
-	$limit = max( 1, $limit );
-	$key   = 'pickprism_authors_week_' . $limit;
-
-	$cache = get_transient( $key );
-	if ( is_array( $cache ) ) {
-		return $cache;
-	}
-
-	$users = get_users(
-		array(
-			'has_published_posts' => array( 'post' ),
-			'orderby'             => 'post_count',
-			'order'               => 'DESC',
-			'number'              => $limit,
-			'fields'              => 'all',
-		)
-	);
-
-	$users = is_array( $users ) ? $users : array();
-
-	set_transient( $key, $users, 6 * HOUR_IN_SECONDS );
-	return $users;
-}
-
-/**
- * Инвалидация authors-кэша.
- */
-function pickprism_flush_authors_cache(): void {
-	global $wpdb;
-	$like = $wpdb->esc_like( '_transient_pickprism_authors_week_' ) . '%';
-	$wpdb->query(
-		$wpdb->prepare(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-			$like,
-			$wpdb->esc_like( '_transient_timeout_pickprism_authors_week_' ) . '%'
-		)
-	);
-}
-add_action(
-	'save_post',
-	static function ( int $post_id, WP_Post $post ): void {
-		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
-			return;
-		}
-		if ( $post->post_type !== 'post' ) {
-			return;
-		}
-		pickprism_flush_authors_cache();
-	},
-	20,
-	2
-);
-add_action( 'deleted_user', 'pickprism_flush_authors_cache' );
-add_action( 'profile_update', 'pickprism_flush_authors_cache' );
