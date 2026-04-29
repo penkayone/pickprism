@@ -1,38 +1,11 @@
 <?php
 /**
- * Hero главной страницы — тёмный centered с glow-эффектом, звёздами и статами.
+ * Hero главной страницы — тёмный centered с glow-эффектом и звёздами.
  *
  * @package Pickprism
  */
 
 defined( 'ABSPATH' ) || exit;
-
-// Стата — считаем реальные значения.
-$total_posts   = (int) wp_count_posts( 'post' )->publish;
-$total_authors = count(
-	get_users(
-		array(
-			'has_published_posts' => array( 'post' ),
-			'fields'              => 'ID',
-			'number'              => 500,
-		)
-	)
-);
-
-$stats = array(
-	array(
-		'value' => number_format_i18n( $total_posts ),
-		'label' => __( 'статей', 'pickprism' ),
-	),
-	array(
-		'value' => number_format_i18n( max( 1, $total_authors ) ),
-		'label' => __( 'авторов', 'pickprism' ),
-	),
-	array(
-		'value' => __( 'ежедн.', 'pickprism' ),
-		'label' => __( 'обновления', 'pickprism' ),
-	),
-);
 
 // Позиции звёзд (фиксированные — для стабильной анимации).
 $stars = array(
@@ -75,18 +48,6 @@ $stars = array(
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M9.8 15.7 9.6 19c.3 0 .5-.1.6-.3l1.7-1.6 3.4 2.5c.6.3 1 .2 1.2-.6l2.2-10.3c.2-1-.3-1.4-1-1.1L4.8 12.4c-1 .4-1 1-.2 1.2l3.3 1 7.7-4.9c.4-.2.7-.1.4.1z"/></svg>
 				<?php esc_html_e( 'Telegram', 'pickprism' ); ?>
 			</a>
-		</div>
-
-		<div class="ha-hero__stats">
-			<?php foreach ( $stats as $i => $stat ) : ?>
-				<div>
-					<b><?php echo esc_html( $stat['value'] ); ?></b>
-					<span><?php echo esc_html( $stat['label'] ); ?></span>
-				</div>
-				<?php if ( $i < count( $stats ) - 1 ) : ?>
-					<div class="ha-hero__stats-sep" aria-hidden="true"></div>
-				<?php endif; ?>
-			<?php endforeach; ?>
 		</div>
 	</div>
 </section>

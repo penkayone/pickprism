@@ -24,7 +24,7 @@ $icons = array(
 <div class="ha-side__block">
 	<div class="ha-side__head">
 		<div class="ha-side__title"><?php esc_html_e( 'Категории', 'pickprism' ); ?></div>
-		<a class="ha-side__all" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+		<a class="ha-side__all" href="<?php echo esc_url( home_url( '/categories/' ) ); ?>">
 			<?php esc_html_e( 'все →', 'pickprism' ); ?>
 		</a>
 	</div>

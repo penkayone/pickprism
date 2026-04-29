@@ -162,50 +162,7 @@
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
-    margin-bottom: 48px;
     justify-content: center;
-  }
-
-  &__stats {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    padding-top: 32px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    justify-content: center;
-
-    @include bp-down-md2 {
-      flex-wrap: wrap;
-      gap: 18px;
-    }
-
-    > div:not(.ha-hero__stats-sep) {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    b {
-      font-family: var(--font-display);
-      font-weight: var(--fw-extrabold);
-      font-size: 28px;
-      letter-spacing: -0.02em;
-      color: #fff;
-    }
-
-    span {
-      font-family: var(--font-sans);
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.55);
-    }
-  }
-
-  &__stats-sep {
-    width: 1px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.12);
-
-    @include bp-down-md2 { display: none; }
   }
 }
 

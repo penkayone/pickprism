@@ -50,6 +50,7 @@ pickprism_require_modules(
 		'sticky',
 		'ajax-search',
 		'comments',
+		'categories-page',
 		'fixtures',
 	)
 );

@@ -24,6 +24,9 @@
 @use 'components/reading-progress';
 @use 'components/comments';
 
+// Standalone-страницы.
+@use 'components/all-categories';
+
 // Прочее (legacy).
 @use 'components/chips';
 @use 'components/search-form';
