@@ -17,7 +17,7 @@ while ( have_posts() ) :
 	<?php get_template_part( 'template-parts/hero-article' ); ?>
 
 	<main id="primary" class="pa-container pa-main pa-main--with-sidebar">
-		<article id="post-<?php the_ID(); ?>" <?php post_class( 'pa-article' ); ?>>
+		<article id="article-body" <?php post_class( 'pa-article' ); ?>>
 			<?php the_content(); ?>
 
 			<?php get_template_part( 'template-parts/author-block' ); ?>

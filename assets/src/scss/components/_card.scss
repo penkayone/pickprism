@@ -335,7 +335,7 @@
     padding: 40px 44px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
 
     @include bp-down-md2 {
       padding: 28px 24px;
@@ -389,63 +389,11 @@
     font-size: 16px;
     line-height: 1.55;
     color: var(--c-text-2);
-    margin: 0 0 24px;
-  }
-
-  &__foot {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding-top: 20px;
-    border-top: 1px solid var(--c-border);
-
-    .ha-card__avatar {
-      width: 40px;
-      height: 40px;
-      font-size: 13px;
-    }
-  }
-
-  &__author {
-    font-family: var(--font-sans);
-    font-weight: var(--fw-semibold);
-    font-size: 14px;
-    color: var(--c-text);
-    line-height: 1.2;
-  }
-
-  &__author-role {
-    font-family: var(--font-sans);
-    font-size: 12px;
-    color: var(--c-text-subtle);
-    line-height: 1.2;
-  }
-
-  &__cta {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 16px;
-    border-radius: var(--radius-md);
-    background: var(--c-dark-2);
-    color: #fff;
-    font-family: var(--font-sans);
-    font-weight: var(--fw-semibold);
-    font-size: 14px;
-    transition:
-      background var(--dur-fast) var(--ease-out),
-      transform var(--dur-fast) var(--ease-out);
-  }
-
-  &:hover &__cta {
-    background: var(--c-accent);
-    transform: translateX(2px);
+    margin: 0;
   }
 
   @include reduced-motion {
     &:hover { transform: none; }
-    &:hover &__cta { transform: none; }
   }
 }
 
