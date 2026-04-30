@@ -18,6 +18,15 @@
   --avatar-c-7: #eef3e0;
 }
 
+.comment-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // pa-comments — новая секция
 // ══════════════════════════════════════════════════════════════════════════
@@ -249,6 +258,7 @@
   flex-direction: column;
   gap: 10px;
   position: relative;
+  grid-column: 1 / -1;
 
   // thread-линия слева
   &::before {
@@ -362,6 +372,7 @@
   background: var(--c-bg-soft);
   border-radius: var(--radius-lg);
   border: 1px solid var(--c-border);
+  grid-column: 1 / -1;
 }
 
 .comment-respond__title {
