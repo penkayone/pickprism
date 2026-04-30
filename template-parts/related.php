@@ -15,14 +15,16 @@ if ( ! $primary_term ) {
 
 $q = new WP_Query(
 	array(
-		'posts_per_page'      => 3,
-		'post__not_in'        => array( $post_id ),
-		'post_status'         => 'publish',
-		'ignore_sticky_posts' => true,
-		'no_found_rows'       => true,
-		'category__in'        => array( (int) $primary_term->term_id ),
-		'orderby'             => 'date',
-		'order'               => 'DESC',
+		'posts_per_page'         => 3,
+		'post__not_in'           => array( $post_id ),
+		'post_status'            => 'publish',
+		'ignore_sticky_posts'    => true,
+		'no_found_rows'          => true,
+		'category__in'           => array( (int) $primary_term->term_id ),
+		'orderby'                => 'date',
+		'order'                  => 'DESC',
+		'update_post_meta_cache' => true,
+		'update_post_term_cache' => true,
 	)
 );
 

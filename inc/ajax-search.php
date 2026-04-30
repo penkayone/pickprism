@@ -201,7 +201,9 @@ function pickprism_rest_feed( WP_REST_Request $request ) {
 
 	switch ( $type ) {
 		case 'category':
-			$term = get_term_by( 'slug', $value, 'category' );
+			$term = ctype_digit( (string) $value )
+				? get_term( (int) $value, 'category' )
+				: get_term_by( 'slug', $value, 'category' );
 			if ( ! $term instanceof WP_Term ) {
 				return new WP_Error( 'pickprism_not_found', __( 'Категория не найдена', 'pickprism' ), array( 'status' => 404 ) );
 			}
@@ -209,7 +211,9 @@ function pickprism_rest_feed( WP_REST_Request $request ) {
 			break;
 
 		case 'tag':
-			$term = get_term_by( 'slug', $value, 'post_tag' );
+			$term = ctype_digit( (string) $value )
+				? get_term( (int) $value, 'post_tag' )
+				: get_term_by( 'slug', $value, 'post_tag' );
 			if ( ! $term instanceof WP_Term ) {
 				return new WP_Error( 'pickprism_not_found', __( 'Тег не найден', 'pickprism' ), array( 'status' => 404 ) );
 			}

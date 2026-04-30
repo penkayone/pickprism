@@ -19,9 +19,23 @@ if ( post_password_required() ) {
 			<h2 class="pa-sec-head__title">
 				<?php
 				$num = (int) get_comments_number();
+				$label_singular = __( '%s комментарий', 'pickprism' );
+				$label_few      = __( '%s комментария', 'pickprism' );
+				$label_many     = __( '%s комментариев', 'pickprism' );
+
+				$mod10  = $num % 10;
+				$mod100 = $num % 100;
+				if ( $mod10 === 1 && $mod100 !== 11 ) {
+					$tpl = $label_singular;
+				} elseif ( $mod10 >= 2 && $mod10 <= 4 && ( $mod100 < 12 || $mod100 > 14 ) ) {
+					$tpl = $label_few;
+				} else {
+					$tpl = $label_many;
+				}
+
 				printf(
 					/* translators: %s: число комментариев. */
-					esc_html( _n( 'Комментарии %s', 'Комментарии %s', $num, 'pickprism' ) ),
+					esc_html( $tpl ),
 					'<span class="pa-sec-head__count">' . esc_html( number_format_i18n( $num ) ) . '</span>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — constructed from escaped count.
 				);
 				?>

@@ -252,3 +252,23 @@ function pickprism_render_cover( int $post_id, string $size = 'md' ): void {
 
 	echo '</div>';
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// Социальные ссылки
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * URL соц. сети из theme_mod. Поддерживает: telegram, reddit, twitter, vk и др.
+ * Пустая строка означает «ссылка не задана» — UI должен скрыть кнопку.
+ *
+ * Чтобы заполнить: WP Admin → Внешний вид → Настроить → custom-css или через
+ * `set_theme_mod( 'pickprism_telegram_url', 'https://t.me/your_channel' )`.
+ *
+ * @param string $network Имя сети (lowercase).
+ * @return string Валидный URL или пустая строка.
+ */
+function pickprism_social_url( string $network ): string {
+	$key = 'pickprism_' . $network . '_url';
+	$url = (string) get_theme_mod( $key, '' );
+	return $url !== '' && filter_var( $url, FILTER_VALIDATE_URL ) ? $url : '';
+}

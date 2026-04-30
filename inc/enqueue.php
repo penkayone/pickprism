@@ -64,6 +64,8 @@ add_action(
 				'loading'      => __( 'Загружаем…', 'pickprism' ),
 				'endOfFeed'    => __( 'Это все статьи', 'pickprism' ),
 				'errorGeneric' => __( 'Что-то пошло не так. Попробуйте ещё раз.', 'pickprism' ),
+				'isNew'        => __( 'Новое', 'pickprism' ),
+				'minRead'      => __( 'мин', 'pickprism' ),
 			),
 		);
 
@@ -128,13 +130,13 @@ function pickprism_feed_context(): array {
 		$term = get_queried_object();
 		if ( $term instanceof WP_Term ) {
 			$ctx['type']  = 'category';
-			$ctx['value'] = (string) $term->slug;
+			$ctx['value'] = (string) $term->term_id;
 		}
 	} elseif ( is_tag() ) {
 		$term = get_queried_object();
 		if ( $term instanceof WP_Term ) {
 			$ctx['type']  = 'tag';
-			$ctx['value'] = (string) $term->slug;
+			$ctx['value'] = (string) $term->term_id;
 		}
 	} elseif ( is_search() ) {
 		$ctx['type']  = 'search';

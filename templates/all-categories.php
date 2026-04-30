@@ -10,17 +10,22 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$pickprism_terms = get_terms(
-	array(
-		'taxonomy'   => 'category',
-		'hide_empty' => true,
-		'orderby'    => 'count',
-		'order'      => 'DESC',
-	)
-);
+$pickprism_terms = get_transient( 'pickprism_all_categories' );
+if ( ! is_array( $pickprism_terms ) ) {
+	$pickprism_terms = get_terms(
+		array(
+			'taxonomy'   => 'category',
+			'hide_empty' => true,
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+		)
+	);
 
-if ( is_wp_error( $pickprism_terms ) ) {
-	$pickprism_terms = array();
+	if ( is_wp_error( $pickprism_terms ) ) {
+		$pickprism_terms = array();
+	}
+
+	set_transient( 'pickprism_all_categories', $pickprism_terms, PICKPRISM_CACHE_TTL );
 }
 
 get_header();

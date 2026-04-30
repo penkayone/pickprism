@@ -28,8 +28,11 @@ $x_url        = 'https://twitter.com/intent/tweet?url=' . rawurlencode( $url ) .
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M9 3h9a2 2 0 0 1 2 2v11h-2V5H9zM5 7h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2m0 2v10h9V9z"/></svg>
 		</button>
 	</div>
-	<a href="https://t.me/" target="_blank" rel="noopener noreferrer" class="pa-mbar__cta">
-		<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M9.8 15.7 9.6 19c.3 0 .5-.1.6-.3l1.7-1.6 3.4 2.5c.6.3 1 .2 1.2-.6l2.2-10.3c.2-1-.3-1.4-1-1.1L4.8 12.4c-1 .4-1 1-.2 1.2l3.3 1 7.7-4.9c.4-.2.7-.1.4.1z"/></svg>
-		<span><?php esc_html_e( 'В канал', 'pickprism' ); ?></span>
-	</a>
+	<?php $pickprism_mbar_tg = pickprism_social_url( 'telegram' ); ?>
+	<?php if ( $pickprism_mbar_tg !== '' ) : ?>
+		<a href="<?php echo esc_url( $pickprism_mbar_tg ); ?>" target="_blank" rel="noopener noreferrer" class="pa-mbar__cta">
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M9.8 15.7 9.6 19c.3 0 .5-.1.6-.3l1.7-1.6 3.4 2.5c.6.3 1 .2 1.2-.6l2.2-10.3c.2-1-.3-1.4-1-1.1L4.8 12.4c-1 .4-1 1-.2 1.2l3.3 1 7.7-4.9c.4-.2.7-.1.4.1z"/></svg>
+			<span><?php esc_html_e( 'В канал', 'pickprism' ); ?></span>
+		</a>
+	<?php endif; ?>
 </div>

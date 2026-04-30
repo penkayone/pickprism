@@ -132,11 +132,10 @@ add_filter(
 			time()
 		);
 
-		// Доп nonce поверх штатного.
-		$extra_nonce = sprintf(
-			'<input type="hidden" name="pickprism_comment_nonce" value="%s" />',
-			esc_attr( wp_create_nonce( 'pickprism_comment' ) )
-		);
+		// Доп nonce — заполняется JS из /pickprism/v1/comment-nonce, чтобы не
+		// протухал в page cache (LiteSpeed). При выключенном JS отправка пойдёт
+		// штатным path через wp-comments-post.php.
+		$extra_nonce = '<input type="hidden" name="pickprism_comment_nonce" value="" />';
 
 		$ordered['pickprism_extras'] = $honeypot . $ts . $extra_nonce;
 
@@ -294,11 +293,15 @@ add_filter(
 );
 
 /**
- * Переименовывает class="children" → class="pa-replies" в HTML-строке списка комментариев.
- * Вызывается из comments.php через ob_start/ob_end.
+ * Переименовывает class="children..." → class="pa-replies..." в HTML-строке списка комментариев.
+ * Допускает доп. классы внутри атрибута и одинарные/двойные кавычки.
  */
 function pickprism_replies_class_swap( string $html ): string {
-	return str_replace( 'class="children"', 'class="pa-replies"', $html );
+	return preg_replace(
+		'/class=(["\'])children([^"\']*)\1/',
+		'class=$1pa-replies$2$1',
+		$html
+	) ?? $html;
 }
 
 
@@ -373,6 +376,26 @@ add_filter(
 add_action(
 	'rest_api_init',
 	static function (): void {
+		// Свежий nonce для формы — обходит page cache.
+		register_rest_route(
+			'pickprism/v1',
+			'/comment-nonce',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => static function () {
+					$response = rest_ensure_response(
+						array(
+							'commentNonce' => wp_create_nonce( 'pickprism_comment' ),
+							'restNonce'    => wp_create_nonce( 'wp_rest' ),
+						)
+					);
+					$response->header( 'Cache-Control', 'no-store, max-age=0' );
+					return $response;
+				},
+				'permission_callback' => static fn() => pickprism_rest_rate_limit( 'comment-nonce', 30 ),
+			)
+		);
+
 		register_rest_route(
 			'pickprism/v1',
 			'/comments',
@@ -650,19 +673,21 @@ function pickprism_render_single_comment( WP_Comment $comment ): string {
 	$prev               = $GLOBALS['comment'] ?? null;
 	$GLOBALS['comment'] = $comment;
 
-	ob_start();
-	pickprism_comment_callback(
-		$comment,
-		array(
-			'style'     => 'ol',
-			'max_depth' => (int) get_option( 'thread_comments_depth', 5 ),
-		),
-		max( 1, (int) $comment->comment_parent > 0 ? 2 : 1 )
-	);
-	echo "</li>\n";
-	$html = (string) ob_get_clean();
-
-	$GLOBALS['comment'] = $prev;
+	try {
+		ob_start();
+		pickprism_comment_callback(
+			$comment,
+			array(
+				'style'     => 'ul',
+				'max_depth' => (int) get_option( 'thread_comments_depth', 5 ),
+			),
+			max( 1, (int) $comment->comment_parent > 0 ? 2 : 1 )
+		);
+		echo "</li>\n";
+		$html = (string) ob_get_clean();
+	} finally {
+		$GLOBALS['comment'] = $prev;
+	}
 
 	return $html;
 }

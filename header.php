@@ -81,9 +81,10 @@ $page_class = is_front_page() ? 'ha-page' : '';
 				</svg>
 			</button>
 
+			<?php $pickprism_header_tg = pickprism_social_url( 'telegram' ); ?>
 			<a
 				class="pa-btn pa-btn--accent"
-				href="https://t.me/"
+				href="<?php echo esc_url( $pickprism_header_tg !== '' ? $pickprism_header_tg : 'https://t.me/' ); ?>"
 				target="_blank"
 				rel="noopener noreferrer"
 			>

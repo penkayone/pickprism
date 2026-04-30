@@ -12,6 +12,9 @@ const escape = (str) =>
     .replace(/'/g, '&#39;');
 
 function cardHTML(item) {
+  const { i18n = {} } = cfg();
+  const labelNew = i18n.isNew || 'Новое';
+  const labelMin = i18n.minRead || 'мин';
   const hue = typeof item.hue === 'number' ? item.hue : 24;
   const categoryName = item.primaryCategory ? item.primaryCategory.name : '';
   const categoryLetter = categoryName ? categoryName.charAt(0).toUpperCase() : 'P';
@@ -48,12 +51,12 @@ function cardHTML(item) {
       ${cover}
       <div class="ha-card__body">
         <div class="ha-card__meta">
-          ${item.isNew ? `<span class="ha-card__new">Новое</span>` : ''}
+          ${item.isNew ? `<span class="ha-card__new">${escape(labelNew)}</span>` : ''}
           <span class="ha-card__date"><time datetime="${escape(item.dateIso)}">${escape(item.date)}</time></span>
           <span class="ha-card__dot" aria-hidden="true">·</span>
           <span class="ha-card__read">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            ${escape(item.readTime || 1)} мин
+            ${escape(item.readTime || 1)} ${escape(labelMin)}
           </span>
         </div>
         <h3 class="ha-card__title">${escape(item.title)}</h3>
@@ -108,8 +111,11 @@ export function initInfiniteScroll() {
       credentials: 'same-origin',
       headers: { Accept: 'application/json' },
     })
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      .then(async (r) => {
+        if (!r.ok) {
+          const body = await r.text().catch(() => '');
+          throw new Error(`HTTP ${r.status} ${r.statusText} — ${body.slice(0, 200)}`);
+        }
         return r.json();
       })
       .then((data) => {
@@ -140,8 +146,9 @@ export function initInfiniteScroll() {
           setStatus('');
         }
       })
-      .catch(() => {
-        setStatus(i18n.errorGeneric || 'Ошибка');
+      .catch((err) => {
+        console.error('[pickprism] feed fetch failed', err);
+        setStatus((i18n.errorGeneric || 'Ошибка') + ' (' + (err && err.message ? err.message : 'unknown') + ')');
       })
       .finally(() => {
         isLoading = false;
