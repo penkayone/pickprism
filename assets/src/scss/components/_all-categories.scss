@@ -1,0 +1,181 @@
+@use '../abstracts/tokens' as *;
+@use '../abstracts/mixins' as *;
+
+// ══════════════════════════════════════════════════════════════════════════
+// Страница /categories/ — список всех категорий.
+// Сетка плиток с hue-иконкой (буква на градиенте), названием, счётчиком
+// и опциональным описанием. Карточка — ссылка на term archive.
+// ══════════════════════════════════════════════════════════════════════════
+
+.pa-allcats-main {
+  background: var(--c-bg-home);
+  min-height: 60vh;
+  padding: clamp(40px, 8vw, 88px) 0 clamp(60px, 10vw, 120px);
+}
+
+.pa-allcats__head {
+  max-width: 720px;
+  margin: 0 auto clamp(28px, 4vw, 48px);
+  text-align: center;
+}
+
+.pa-allcats__title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-extrabold);
+  font-size: clamp(32px, 5vw, var(--fs-4xl));
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+  color: var(--c-text);
+  margin: 0 0 12px;
+}
+
+.pa-allcats__desc {
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  color: var(--c-text-2);
+  margin: 0;
+}
+
+// ── Grid ──────────────────────────────────────────────────────────────────
+.pa-allcats__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+
+  @include bp-down-md {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+.pa-allcats__item {
+  display: flex;
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────
+.pa-allcats__card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  padding: 20px;
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  color: var(--c-text);
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--c-border-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:hover .pa-allcats__icon {
+    transform: scale(1.05) rotate(-2deg);
+  }
+
+  &:hover .pa-allcats__arrow {
+    transform: translateX(4px);
+    color: var(--c-accent);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+// ── Icon (hue gradient + letter) ──────────────────────────────────────────
+.pa-allcats__icon {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    135deg,
+    hsl(var(--hue, 24) 80% 60%),
+    hsl(calc(var(--hue, 24) + 30) 84% 46%)
+  );
+  color: #fff;
+  box-shadow: 0 6px 18px hsl(var(--hue, 24) 60% 40% / 0.22);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.pa-allcats__letter {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────
+.pa-allcats__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pa-allcats__name {
+  font-family: var(--font-display);
+  font-weight: var(--fw-extrabold);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+  color: var(--c-text);
+  letter-spacing: -0.005em;
+}
+
+.pa-allcats__count {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--c-accent-text);
+  letter-spacing: 0.02em;
+}
+
+.pa-allcats__excerpt {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  color: var(--c-text-muted);
+  margin-top: 4px;
+  @include clamp-lines(2);
+}
+
+// ── Arrow ─────────────────────────────────────────────────────────────────
+.pa-allcats__arrow {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  align-self: center;
+  color: var(--c-text-subtle);
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────
+.pa-allcats__empty {
+  max-width: 480px;
+  margin: 40px auto 0;
+  padding: 32px 24px;
+  background: var(--c-bg-card);
+  border: 1px dashed var(--c-border-strong);
+  border-radius: var(--radius-xl);
+  text-align: center;
+}

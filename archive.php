@@ -1,6 +1,6 @@
 <?php
 /**
- * Общий archive.
+ * Общий archive (category / tag / date / author).
  *
  * @package Pickprism
  */
@@ -9,32 +9,34 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 ?>
-<main id="primary" class="site-main container">
+<div class="ha-container">
 	<header class="page-header">
 		<?php the_archive_title( '<h1 class="page-header__title">', '</h1>' ); ?>
 		<?php the_archive_description( '<p class="page-header__desc">', '</p>' ); ?>
 	</header>
 
-	<div class="layout-with-sidebar">
-		<div class="feed" data-feed-container>
-			<section class="feed__list" data-feed-list>
-				<?php
-				if ( have_posts() ) :
+	<div class="ha-withside">
+		<section class="ha-feed" id="feed" data-feed-container>
+			<?php if ( have_posts() ) : ?>
+				<div class="ha-feed__grid" data-feed-list>
+					<?php
 					while ( have_posts() ) :
 						the_post();
 						get_template_part( 'template-parts/card-article' );
 					endwhile;
-				else :
-					echo '<p class="empty-state__text">' . esc_html__( 'В этом архиве пока нет статей.', 'pickprism' ) . '</p>';
-				endif;
-				?>
-			</section>
+					?>
+				</div>
 
-			<?php get_template_part( 'template-parts/pagination' ); ?>
-		</div>
+				<?php get_template_part( 'template-parts/pagination' ); ?>
+
+				<div class="ha-sentinel" data-feed-sentinel aria-hidden="true"></div>
+			<?php else : ?>
+				<p class="empty-state__text"><?php esc_html_e( 'В этом архиве пока нет статей.', 'pickprism' ); ?></p>
+			<?php endif; ?>
+		</section>
 
 		<?php get_sidebar(); ?>
 	</div>
-</main>
+</div>
 <?php
 get_footer();

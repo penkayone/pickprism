@@ -1,25 +1,347 @@
-// Comments — список и форма.
-// Дизайн в духе g2: чистые строки, мягкие аватары, тёмный текст.
-// Палитра аватаров — 8 soft фонов, текст всегда --c-text.
+// Comments — list + form.
+// Редизайн pressaff-style: новая разметка pa-comment / pa-replies / pa-cform.
+// Legacy-классы (.comment-item, .comment-form) сохранены для обратной совместимости,
+// но PHP-callback на этапе backend перепишется на pa-comment.
 
+@use '../abstracts/tokens' as *;
 @use '../abstracts/mixins' as *;
 
 :root {
-  // 8 мягких фонов для аватаров. Контраст AA с --c-text (#151a26).
-  --avatar-c-0: #e8eaff; // голубой
-  --avatar-c-1: #e3f5ec; // мятный
-  --avatar-c-2: #fdecef; // розовый
-  --avatar-c-3: #fff0da; // персиковый
-  --avatar-c-4: #ece6fb; // сиреневый
-  --avatar-c-5: #e0f1f6; // холодный голубой
-  --avatar-c-6: #fbeedb; // жёлто-бежевый
-  --avatar-c-7: #eef3e0; // оливковый
+  // 8 мягких фонов для аватаров (fallback).
+  --avatar-c-0: #e8eaff;
+  --avatar-c-1: #e3f5ec;
+  --avatar-c-2: #fdecef;
+  --avatar-c-3: #fff0da;
+  --avatar-c-4: #ece6fb;
+  --avatar-c-5: #e0f1f6;
+  --avatar-c-6: #fbeedb;
+  --avatar-c-7: #eef3e0;
 }
 
-// -------------------------------------------------------------------------
-// Обёртка секции
-// -------------------------------------------------------------------------
+.comment-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  line-height: 1;
+  flex-shrink: 0;
+}
 
+// ══════════════════════════════════════════════════════════════════════════
+// pa-comments — новая секция
+// ══════════════════════════════════════════════════════════════════════════
+.pa-comments {
+  padding-block: 40px 80px;
+  max-width: 860px;
+  margin-inline: auto;
+
+  @include bp-down-lg {
+    padding-bottom: 120px;
+  }
+}
+
+.pa-cform {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px;
+  margin-bottom: 32px;
+
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--c-bg-soft);
+    color: var(--c-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-sans);
+    font-weight: var(--fw-semibold);
+    font-size: 13px;
+    border: 1px solid var(--c-border);
+  }
+
+  &__wrap {
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+    transition: border-color var(--dur-base) var(--ease-out);
+
+    &:focus-within {
+      border-color: var(--c-accent);
+      box-shadow: 0 0 0 4px var(--c-accent-soft);
+    }
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px 12px;
+    gap: 12px;
+    border-top: 1px solid var(--c-border);
+  }
+
+  &__hint {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--c-text-subtle);
+  }
+}
+
+.pa-clist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+// ── Комментарий (top-level) ────────────────────────────────────────────────
+.pa-comment {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px;
+  padding: 20px 0;
+  border-top: 1px solid var(--c-border);
+
+  &:first-child { border-top: none; }
+
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c7d0e0, #a7b2c8);
+    color: #fff;
+    font-weight: var(--fw-bold);
+    font-size: 15px;
+    font-family: var(--font-display);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &--sm {
+      width: 36px;
+      height: 36px;
+      font-size: 13px;
+
+      @include bp-down-md {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+      }
+    }
+  }
+
+  &.is-author &__avatar {
+    background: linear-gradient(135deg, var(--c-accent), #ffae4f);
+    box-shadow: 0 4px 14px rgba(255, 122, 26, 0.3);
+  }
+
+  &__body { min-width: 0; }
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  &__author {
+    font-family: var(--font-sans);
+    font-weight: var(--fw-semibold);
+    font-size: 14.5px;
+    color: var(--c-text);
+  }
+
+  &.is-author &__author {
+    color: var(--c-accent);
+  }
+
+  &__time {
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    color: var(--c-text-subtle);
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 1px 7px;
+    font-family: var(--font-display);
+    font-size: 10.5px;
+    font-weight: var(--fw-bold);
+    letter-spacing: 0.04em;
+    color: var(--c-accent-text);
+    background: var(--c-accent-soft);
+    border-radius: var(--radius-full);
+    vertical-align: 1px;
+    text-transform: uppercase;
+  }
+
+  &__text {
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--c-text-2);
+    margin-bottom: 10px;
+
+    p { margin: 0 0 var(--sp-3); }
+    p:last-child { margin-bottom: 0; }
+
+    a {
+      color: var(--c-accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+
+    button,
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      padding: 4px 2px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--c-text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--dur-fast) var(--ease-out);
+
+      &:hover { color: var(--c-accent); }
+    }
+  }
+
+  &__pending {
+    display: inline-block;
+    margin-left: auto;
+    padding: 2px var(--sp-2);
+    background: #fff4d1;
+    color: #8a6a00;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+    border-radius: var(--radius-sm);
+  }
+
+  // Подсветка комментария автора поста (top-level).
+  &.is-author > &__body {
+    background: linear-gradient(180deg, var(--c-accent-soft) 0%, #fff 60%);
+    border: 1px solid var(--c-accent-soft-2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-left: -4px;
+  }
+}
+
+// ── Replies (nested thread) ────────────────────────────────────────────────
+.pa-replies {
+  list-style: none;
+  margin: 16px 0 4px;
+  padding: 0 0 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  grid-column: 1 / -1;
+
+  // thread-линия слева
+  &::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--c-border-strong);
+    border-radius: 2px;
+  }
+}
+
+.pa-reply {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--c-bg-soft);
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+
+  // «Ответвление» к thread-линии
+  &::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 26px;
+    width: 18px;
+    height: 2px;
+    background: var(--c-border-strong);
+    border-radius: 2px;
+  }
+
+  &.is-author {
+    background: linear-gradient(180deg, var(--c-accent-soft) 0%, #fff 100%);
+    border-color: var(--c-accent-soft-2);
+  }
+
+  @include bp-down-md {
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    margin-left: 12px;
+    padding: 10px 12px;
+
+    &::before { left: -10px; width: 12px; }
+  }
+
+  .pa-comment__text { font-size: 14px; line-height: 1.55; }
+  .pa-comment__head { gap: 10px; flex-wrap: wrap; }
+  .pa-comment__author { font-size: 14px; }
+}
+
+.pa-clist__more {
+  display: block;
+  margin: 24px auto 0;
+  padding: 10px 22px;
+  border-radius: var(--radius-md);
+  background: var(--c-bg-soft);
+  color: var(--c-text-2);
+  border: 1px solid var(--c-border);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    border-color: var(--c-accent);
+    color: var(--c-accent);
+    background: var(--c-accent-soft);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// Форма комментариев (наши классы .comment-form — не меняем PHP-разметку,
+// только обновляем стили под новую палитру/шрифты)
+// ══════════════════════════════════════════════════════════════════════════
 .comments-section {
   margin-top: var(--sp-9);
   padding-top: var(--sp-7);
@@ -27,10 +349,12 @@
 }
 
 .comments-title {
+  font-family: var(--font-display);
   font-size: var(--fs-xl);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-extrabold);
   color: var(--c-text);
   margin-bottom: var(--sp-6);
+  letter-spacing: -0.025em;
 }
 
 .comments-closed {
@@ -42,183 +366,22 @@
   text-align: center;
 }
 
-// -------------------------------------------------------------------------
-// Список и вложенность
-// -------------------------------------------------------------------------
-
-.comment-list,
-.comment-list .children {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.comment-list > .comment-item {
-  padding: var(--sp-5) 0;
-  border-bottom: 1px solid var(--c-border);
-
-  &:first-child { padding-top: 0; }
-  &:last-child { border-bottom: 0; padding-bottom: 0; }
-}
-
-.comment-list .children {
-  margin-inline-start: var(--sp-6);
-  margin-top: var(--sp-5);
-  padding-inline-start: var(--sp-5);
-  border-inline-start: 1px solid var(--c-border);
-
-  > .comment-item {
-    padding: var(--sp-4) 0;
-
-    &:first-child { padding-top: 0; }
-    &:last-child { padding-bottom: 0; }
-  }
-}
-
-// Макс 2 уровня — глубже не отступаем.
-.comment-list .children .children .children {
-  margin-inline-start: 0;
-  padding-inline-start: 0;
-  border-inline-start: 0;
-}
-
-// -------------------------------------------------------------------------
-// Тело одного комментария
-// -------------------------------------------------------------------------
-
-.comment-body {
-  display: flex;
-  gap: var(--sp-4);
-  align-items: flex-start;
-}
-
-.comment-avatar-col { flex-shrink: 0; }
-
-.comment-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
-  font-weight: var(--fw-semibold);
-  font-size: var(--fs-md);
-  color: var(--c-text);
-  line-height: 1;
-  user-select: none;
-  background: var(--avatar-c-0);
-
-  @media (max-width: 640px) {
-    width: 36px;
-    height: 36px;
-    font-size: var(--fs-base);
-  }
-
-  &[data-bg="0"] { background: var(--avatar-c-0); }
-  &[data-bg="1"] { background: var(--avatar-c-1); }
-  &[data-bg="2"] { background: var(--avatar-c-2); }
-  &[data-bg="3"] { background: var(--avatar-c-3); }
-  &[data-bg="4"] { background: var(--avatar-c-4); }
-  &[data-bg="5"] { background: var(--avatar-c-5); }
-  &[data-bg="6"] { background: var(--avatar-c-6); }
-  &[data-bg="7"] { background: var(--avatar-c-7); }
-}
-
-.comment-content-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.comment-header {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
-  font-size: var(--fs-sm);
-}
-
-.comment-author {
-  font-weight: var(--fw-semibold);
-  color: var(--c-text);
-}
-
-.comment-sep { color: var(--c-text-subtle); }
-
-.comment-date {
-  color: var(--c-text-muted);
-}
-
-.comment-pending {
-  display: inline-block;
-  margin-left: auto;
-  padding: 2px var(--sp-2);
-  background: #fff4d1;
-  color: #8a6a00;
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-medium);
-  border-radius: var(--radius-sm);
-}
-
-.comment-text {
-  color: var(--c-text);
-  font-size: var(--fs-base);
-  line-height: var(--lh-normal);
-  word-wrap: break-word;
-
-  p { margin: 0 0 var(--sp-3); }
-  p:last-child { margin-bottom: 0; }
-
-  a {
-    color: var(--c-link);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    &:hover { color: var(--c-accent-hover); }
-  }
-}
-
-.comment-footer {
-  margin-top: var(--sp-3);
-}
-
-.comment-reply-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-1);
-  color: var(--c-text-muted);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  padding: var(--sp-1) var(--sp-3);
-  border-radius: var(--radius-sm);
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
-
-  &:hover {
-    color: var(--c-accent);
-    background: var(--c-accent-soft);
-  }
-
-  &:focus-visible { @include focus-ring; }
-}
-
-// -------------------------------------------------------------------------
-// Форма
-// -------------------------------------------------------------------------
-
 .comment-respond {
   margin-top: var(--sp-8);
   padding: var(--sp-6);
   background: var(--c-bg-soft);
   border-radius: var(--radius-lg);
   border: 1px solid var(--c-border);
+  grid-column: 1 / -1;
 }
 
 .comment-respond__title {
+  font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-bold);
   color: var(--c-text);
   margin-bottom: var(--sp-4);
+  letter-spacing: -0.02em;
 
   #cancel-comment-reply-link {
     margin-left: var(--sp-3);
@@ -237,6 +400,7 @@
   gap: var(--sp-4);
 
   &__notes {
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     color: var(--c-text-muted);
     margin: 0;
@@ -250,6 +414,7 @@
   }
 
   &__label {
+    font-family: var(--font-sans);
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
     color: var(--c-text);
@@ -261,12 +426,12 @@
   &__textarea {
     width: 100%;
     padding: var(--sp-3) var(--sp-4);
-    background: #fff;
+    background: var(--c-bg-card);
     border: 1px solid var(--c-border);
     border-radius: var(--radius-md);
+    font-family: var(--font-sans);
     font-size: var(--fs-base);
     color: var(--c-text);
-    font-family: inherit;
     line-height: var(--lh-normal);
     transition:
       border-color var(--dur-fast) var(--ease-out),
@@ -287,16 +452,13 @@
     field-sizing: content;
   }
 
-  // Две колонки имя/email на md+.
   @include bp-md {
     &__row--author,
     &__row--email {
       grid-column: span 1;
     }
 
-    & {
-      grid-template-columns: 1fr 1fr;
-    }
+    & { grid-template-columns: 1fr 1fr; }
 
     &__notes,
     &__row--comment,
@@ -307,7 +469,6 @@
     }
   }
 
-  // Cookie opt-in (WP добавляет этот блок).
   .comment-form-cookies-consent {
     grid-column: 1 / -1;
     display: flex;
@@ -349,7 +510,6 @@
     }
   }
 
-  // Honeypot — визуально и программно спрятан.
   &__honeypot {
     position: absolute !important;
     left: -9999px !important;

@@ -1,31 +1,31 @@
 <?php
 /**
- * Sidebar: облако популярных тегов.
+ * Sidebar-блок «Популярные теги» — pill-теги.
  *
  * @package Pickprism
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$tags = pickprism_get_popular_tags( 20 );
+$tags = pickprism_get_popular_tags( 12 );
 if ( empty( $tags ) ) {
 	return;
 }
 ?>
-<section class="sidebar__block sidebar__tags">
-	<h3 class="sidebar__title"><?php esc_html_e( 'Теги', 'pickprism' ); ?></h3>
-	<ul class="chips__list chips__list--wrap">
-		<?php foreach ( $tags as $term ) :
-			$link = get_term_link( $term );
+<div class="ha-side__block">
+	<div class="ha-side__head">
+		<div class="ha-side__title"><?php esc_html_e( 'Популярные теги', 'pickprism' ); ?></div>
+	</div>
+	<div class="ha-side__tags">
+		<?php foreach ( $tags as $tag ) :
+			$link = get_term_link( $tag );
 			if ( is_wp_error( $link ) ) {
 				continue;
 			}
 			?>
-			<li>
-				<a class="chip chip--tag chip--sm" href="<?php echo esc_url( $link ); ?>">
-					#<?php echo esc_html( $term->name ); ?>
-				</a>
-			</li>
+			<a class="ha-side__tagitem" href="<?php echo esc_url( $link ); ?>">
+				<span>#</span><?php echo esc_html( $tag->name ); ?>
+			</a>
 		<?php endforeach; ?>
-	</ul>
-</section>
+	</div>
+</div>

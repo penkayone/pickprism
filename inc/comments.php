@@ -132,11 +132,10 @@ add_filter(
 			time()
 		);
 
-		// Доп nonce поверх штатного.
-		$extra_nonce = sprintf(
-			'<input type="hidden" name="pickprism_comment_nonce" value="%s" />',
-			esc_attr( wp_create_nonce( 'pickprism_comment' ) )
-		);
+		// Доп nonce — заполняется JS из /pickprism/v1/comment-nonce, чтобы не
+		// протухал в page cache (LiteSpeed). При выключенном JS отправка пойдёт
+		// штатным path через wp-comments-post.php.
+		$extra_nonce = '<input type="hidden" name="pickprism_comment_nonce" value="" />';
 
 		$ordered['pickprism_extras'] = $honeypot . $ts . $extra_nonce;
 
@@ -182,12 +181,32 @@ add_filter( 'pre_option_comment_registration', '__return_zero' );
  * ------------------------------------------------------------------------- */
 
 /**
+ * True, если коммент от автора поста (сравниваем email).
+ */
+function pickprism_comment_is_by_post_author( WP_Comment $comment ): bool {
+	$post_id = (int) $comment->comment_post_ID;
+	if ( $post_id <= 0 ) {
+		return false;
+	}
+	$post = get_post( $post_id );
+	if ( ! $post instanceof WP_Post ) {
+		return false;
+	}
+	$post_author_email = (string) get_the_author_meta( 'user_email', (int) $post->post_author );
+	$comment_email     = strtolower( trim( (string) $comment->comment_author_email ) );
+	if ( $post_author_email === '' || $comment_email === '' ) {
+		return false;
+	}
+	return strtolower( $post_author_email ) === $comment_email;
+}
+
+/**
  * Callback для wp_list_comments. Рендерит ОДИН уровень, WP сам обходит дерево.
- * Никаких бейджей «автор поста» и ссылок на профиль юзера.
+ * Редизайн: .pa-comment (depth=1) / .pa-reply (depth>1) + бейдж «Автор».
  *
- * @param WP_Comment $comment     Текущий коммент.
- * @param array      $args        Аргументы wp_list_comments.
- * @param int        $depth       Глубина вложенности (1..N).
+ * @param WP_Comment $comment
+ * @param array      $args
+ * @param int        $depth
  */
 function pickprism_comment_callback( $comment, $args, $depth ): void {
 	$tag       = ( ! empty( $args['style'] ) && 'div' === $args['style'] ) ? 'div' : 'li';
@@ -197,52 +216,57 @@ function pickprism_comment_callback( $comment, $args, $depth ): void {
 	$date_iso  = get_comment_date( 'c', $comment );
 	$date_disp = get_comment_date( '', $comment );
 	$max_depth = (int) ( $args['max_depth'] ?? 5 );
+	$is_author = pickprism_comment_is_by_post_author( $comment );
+	$is_reply  = $depth > 1;
+	$size      = $is_reply ? 36 : 44;
 
-	// Классы без bypostauthor, без comment-author-* (все равны).
-	$classes = array( 'comment-item' );
-	if ( $depth > 1 ) {
-		$classes[] = 'comment-item--nested';
+	$classes = array( $is_reply ? 'pa-reply' : 'pa-comment' );
+	if ( $is_author ) {
+		$classes[] = 'is-author';
 	}
 
 	?>
 	<<?php echo esc_attr( $tag ); ?> id="comment-<?php comment_ID(); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>">
-		<article class="comment-body">
-			<div class="comment-avatar-col">
-				<?php echo pickprism_comment_avatar( $email, $author, 44 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — avatar returns escaped HTML. ?>
-			</div>
-			<div class="comment-content-col">
-				<header class="comment-header">
-					<span class="comment-author"><?php echo esc_html( $author !== '' ? $author : __( 'Аноним', 'pickprism' ) ); ?></span>
-					<span class="comment-sep" aria-hidden="true">·</span>
-					<time class="comment-date" datetime="<?php echo esc_attr( $date_iso ); ?>"><?php echo esc_html( $date_disp ); ?></time>
-					<?php if ( '0' === $comment->comment_approved ) : ?>
-						<span class="comment-pending"><?php esc_html_e( 'Ожидает одобрения', 'pickprism' ); ?></span>
+		<div class="pa-comment__avatar<?php echo $is_reply ? ' pa-comment__avatar--sm' : ''; ?>" aria-hidden="true">
+			<?php echo pickprism_comment_avatar( $email, $author, $size ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — avatar returns escaped HTML. ?>
+		</div>
+		<div class="pa-comment__body">
+			<div class="pa-comment__head">
+				<span class="pa-comment__author">
+					<?php echo esc_html( $author !== '' ? $author : __( 'Аноним', 'pickprism' ) ); ?>
+					<?php if ( $is_author ) : ?>
+						<span class="pa-comment__badge"><?php esc_html_e( 'Автор', 'pickprism' ); ?></span>
 					<?php endif; ?>
-				</header>
-
-				<div class="comment-text">
-					<?php echo wp_kses_post( wpautop( $content ) ); ?>
-				</div>
-
-				<footer class="comment-footer">
-					<?php
-					// Reply доступен всем, без проверок на логин.
-					echo get_comment_reply_link(
-						array_merge(
-							$args,
-							array(
-								'reply_text' => __( 'Ответить', 'pickprism' ),
-								'depth'      => $depth,
-								'max_depth'  => $max_depth,
-								'before'     => '',
-								'after'      => '',
-							)
-						)
-					); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — WP-core escaped.
-					?>
-				</footer>
+				</span>
+				<time class="pa-comment__time" datetime="<?php echo esc_attr( $date_iso ); ?>">
+					<?php echo esc_html( $date_disp ); ?>
+				</time>
+				<?php if ( '0' === $comment->comment_approved ) : ?>
+					<span class="pa-comment__pending"><?php esc_html_e( 'Ожидает одобрения', 'pickprism' ); ?></span>
+				<?php endif; ?>
 			</div>
-		</article>
+
+			<div class="pa-comment__text">
+				<?php echo wp_kses_post( wpautop( $content ) ); ?>
+			</div>
+
+			<div class="pa-comment__actions">
+				<?php
+				echo get_comment_reply_link(
+					array_merge(
+						$args,
+						array(
+							'reply_text' => __( 'Ответить', 'pickprism' ),
+							'depth'      => $depth,
+							'max_depth'  => $max_depth,
+							'before'     => '',
+							'after'      => '',
+						)
+					)
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — WP-core escaped.
+				?>
+			</div>
+		</div>
 	<?php
 	// Закрывающий тег для <li>/<div> ставит сам WP, если end-callback не задан.
 }
@@ -253,6 +277,33 @@ function pickprism_comment_callback( $comment, $args, $depth ): void {
 function pickprism_comment_end_callback(): void {
 	echo "</li>\n";
 }
+
+/**
+ * Force style=ul для wp_list_comments — чтобы children wrapper был <ul>,
+ * который мы переименуем в .pa-replies через pickprism_replies_class_swap в comments.php.
+ */
+add_filter(
+	'wp_list_comments_args',
+	static function ( $args ) {
+		if ( is_array( $args ) ) {
+			$args['style'] = 'ul';
+		}
+		return $args;
+	}
+);
+
+/**
+ * Переименовывает class="children..." → class="pa-replies..." в HTML-строке списка комментариев.
+ * Допускает доп. классы внутри атрибута и одинарные/двойные кавычки.
+ */
+function pickprism_replies_class_swap( string $html ): string {
+	return preg_replace(
+		'/class=(["\'])children([^"\']*)\1/',
+		'class=$1pa-replies$2$1',
+		$html
+	) ?? $html;
+}
+
 
 /* -------------------------------------------------------------------------
  * 4. Плейсхолдер аватара (без Gravatar).
@@ -325,6 +376,26 @@ add_filter(
 add_action(
 	'rest_api_init',
 	static function (): void {
+		// Свежий nonce для формы — обходит page cache.
+		register_rest_route(
+			'pickprism/v1',
+			'/comment-nonce',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => static function () {
+					$response = rest_ensure_response(
+						array(
+							'commentNonce' => wp_create_nonce( 'pickprism_comment' ),
+							'restNonce'    => wp_create_nonce( 'wp_rest' ),
+						)
+					);
+					$response->header( 'Cache-Control', 'no-store, max-age=0' );
+					return $response;
+				},
+				'permission_callback' => static fn() => pickprism_rest_rate_limit( 'comment-nonce', 30 ),
+			)
+		);
+
 		register_rest_route(
 			'pickprism/v1',
 			'/comments',
@@ -602,19 +673,21 @@ function pickprism_render_single_comment( WP_Comment $comment ): string {
 	$prev               = $GLOBALS['comment'] ?? null;
 	$GLOBALS['comment'] = $comment;
 
-	ob_start();
-	pickprism_comment_callback(
-		$comment,
-		array(
-			'style'     => 'ol',
-			'max_depth' => (int) get_option( 'thread_comments_depth', 5 ),
-		),
-		max( 1, (int) $comment->comment_parent > 0 ? 2 : 1 )
-	);
-	echo "</li>\n";
-	$html = (string) ob_get_clean();
-
-	$GLOBALS['comment'] = $prev;
+	try {
+		ob_start();
+		pickprism_comment_callback(
+			$comment,
+			array(
+				'style'     => 'ul',
+				'max_depth' => (int) get_option( 'thread_comments_depth', 5 ),
+			),
+			max( 1, (int) $comment->comment_parent > 0 ? 2 : 1 )
+		);
+		echo "</li>\n";
+		$html = (string) ob_get_clean();
+	} finally {
+		$GLOBALS['comment'] = $prev;
+	}
 
 	return $html;
 }

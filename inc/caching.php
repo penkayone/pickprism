@@ -86,14 +86,16 @@ function pickprism_get_popular_posts( int $limit = 5 ): array {
 
 	$q = new WP_Query(
 		array(
-			'posts_per_page'      => $limit,
-			'orderby'             => 'comment_count',
-			'order'               => 'DESC',
-			'ignore_sticky_posts' => true,
-			'no_found_rows'       => true,
-			'post_status'         => 'publish',
-			'fields'              => '',
-			'date_query'          => array(
+			'posts_per_page'         => $limit,
+			'orderby'                => 'comment_count',
+			'order'                  => 'DESC',
+			'ignore_sticky_posts'    => true,
+			'no_found_rows'          => true,
+			'post_status'            => 'publish',
+			'fields'                 => '',
+			'update_post_meta_cache' => true,
+			'update_post_term_cache' => true,
+			'date_query'             => array(
 				array( 'after' => '60 days ago' ),
 			),
 		)
@@ -105,12 +107,14 @@ function pickprism_get_popular_posts( int $limit = 5 ): array {
 	if ( empty( $posts ) ) {
 		$q = new WP_Query(
 			array(
-				'posts_per_page'      => $limit,
-				'orderby'             => 'date',
-				'order'               => 'DESC',
-				'ignore_sticky_posts' => true,
-				'no_found_rows'       => true,
-				'post_status'         => 'publish',
+				'posts_per_page'         => $limit,
+				'orderby'                => 'date',
+				'order'                  => 'DESC',
+				'ignore_sticky_posts'    => true,
+				'no_found_rows'          => true,
+				'post_status'            => 'publish',
+				'update_post_meta_cache' => true,
+				'update_post_term_cache' => true,
 			)
 		);
 		$posts = $q->posts ?: array();
@@ -121,23 +125,34 @@ function pickprism_get_popular_posts( int $limit = 5 ): array {
 }
 
 /**
- * Инвалидация кэшей при публикации и удалении.
+ * Реестр известных транзиент-ключей темы. Любой новый кеш — добавлять сюда.
+ *
+ * @return string[]
  */
-function pickprism_flush_widget_cache(): void {
-	global $wpdb;
-
-	// Точечно удаляем по префиксу через options (транзиенты хранятся там при отсутствии object cache).
-	$like = $wpdb->esc_like( '_transient_pickprism_' ) . '%';
-	$wpdb->query(
-		$wpdb->prepare(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-			$like,
-			$wpdb->esc_like( '_transient_timeout_pickprism_' ) . '%'
-		)
+function pickprism_transient_keys(): array {
+	$keys = array(
+		'pickprism_all_categories',
 	);
 
-	if ( wp_using_ext_object_cache() ) {
-		wp_cache_flush_group( 'pickprism' );
+	foreach ( array( 5, 10, 20 ) as $limit ) {
+		$keys[] = 'pickprism_top_categories_' . $limit;
+		$keys[] = 'pickprism_popular_tags_' . $limit;
+		$keys[] = 'pickprism_popular_posts_' . $limit;
+	}
+
+	return apply_filters( 'pickprism_transient_keys', $keys );
+}
+
+/**
+ * Инвалидация кэшей при публикации и удалении.
+ *
+ * Используем delete_transient — корректно работает и с options-store, и с
+ * external object cache (Redis/Memcached). Прямой DELETE в options не очищал бы
+ * Redis-бэкенд транзиентов.
+ */
+function pickprism_flush_widget_cache(): void {
+	foreach ( pickprism_transient_keys() as $key ) {
+		delete_transient( $key );
 	}
 }
 

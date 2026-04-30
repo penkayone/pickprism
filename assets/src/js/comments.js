@@ -48,6 +48,35 @@ function refreshTimestamp(form) {
   if (ts) ts.value = Math.floor(Date.now() / 1000);
 }
 
+/**
+ * Тянет свежие nonce с сервера и кладёт их в форму + window.Pickprism.
+ * Нужно потому, что страница кешируется (LiteSpeed) и встроенные nonce протухают.
+ */
+async function refreshNonces(form) {
+  const { restUrl } = cfg();
+  if (!restUrl) return false;
+  try {
+    const res = await fetch(`${restUrl}comment-nonce`, {
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!data || typeof data !== 'object') return false;
+    if (data.restNonce && window.Pickprism) {
+      window.Pickprism.nonce = data.restNonce;
+    }
+    if (data.commentNonce) {
+      const input = form.querySelector('input[name="pickprism_comment_nonce"]');
+      if (input) input.value = data.commentNonce;
+    }
+    return true;
+  } catch (err) {
+    console.error('[pickprism] nonce refresh failed', err);
+    return false;
+  }
+}
+
 // -------------------------------------------------------------------------
 // Reply — свой обработчик.
 // -------------------------------------------------------------------------
@@ -126,9 +155,8 @@ function initReply() {
 async function submitComment(form, e) {
   e.preventDefault();
 
-  const { restUrl, nonce, i18n = {} } = cfg();
-  if (!restUrl || !nonce) {
-    // JS-конфиг не загружен — уступаем браузеру (фолбэк на action).
+  const { restUrl, i18n = {} } = cfg();
+  if (!restUrl) {
     form.submit();
     return;
   }
@@ -140,6 +168,21 @@ async function submitComment(form, e) {
     submitBtn.disabled = true;
   }
   hideNotice(form);
+
+  // Если nonce ещё не подгрузился (init refresh не успел) — добираем сейчас.
+  const nonceInput = form.querySelector('input[name="pickprism_comment_nonce"]');
+  if (!nonceInput || !nonceInput.value) {
+    await refreshNonces(form);
+  }
+  const nonce = (window.Pickprism && window.Pickprism.nonce) || '';
+  if (!nonce) {
+    showNotice(form, 'error', i18n.errorGeneric || 'Не удалось получить токен. Обновите страницу.');
+    if (submitBtn) {
+      submitBtn.removeAttribute('aria-busy');
+      submitBtn.disabled = false;
+    }
+    return;
+  }
 
   const fd = new FormData(form);
   // Обязательные поля для REST (имена совпадают).
@@ -198,7 +241,7 @@ function resetForm(form) {
 
 /**
  * Вставляет HTML одного комментария в список.
- * Если reply (parent > 0) — в .children у родителя (создаём при отсутствии).
+ * Если reply (parent > 0) — в .pa-replies у родителя (создаём при отсутствии).
  * Иначе — в конец верхнего списка.
  */
 function insertApprovedComment(form, data) {
@@ -210,13 +253,13 @@ function insertApprovedComment(form, data) {
     10
   );
 
-  let list = section.querySelector('.comment-list');
+  let list = section.querySelector('.pa-clist');
   if (!list) {
-    list = document.createElement('ol');
-    list.className = 'comment-list';
-    const title = section.querySelector('.comments-title');
-    if (title) {
-      title.after(list);
+    list = document.createElement('ul');
+    list.className = 'pa-clist';
+    const head = section.querySelector('.pa-sec-head');
+    if (head) {
+      head.after(list);
     } else {
       section.prepend(list);
     }
@@ -230,10 +273,10 @@ function insertApprovedComment(form, data) {
   if (parentId > 0) {
     const parentEl = document.getElementById(`comment-${parentId}`);
     if (parentEl) {
-      let children = parentEl.querySelector(':scope > .children');
+      let children = parentEl.querySelector(':scope > .pa-replies');
       if (!children) {
-        children = document.createElement('ol');
-        children.className = 'children';
+        children = document.createElement('ul');
+        children.className = 'pa-replies';
         parentEl.appendChild(children);
       }
       children.appendChild(newItem);
@@ -262,6 +305,7 @@ export function initComments() {
   if (!form) return;
 
   refreshTimestamp(form);
+  refreshNonces(form);
   initReply();
 
   form.addEventListener('submit', (e) => submitComment(form, e));

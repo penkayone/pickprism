@@ -22,27 +22,5 @@ add_action(
 	}
 );
 
-/**
- * Убираем версии WP из URL скриптов и стилей.
- */
-add_filter(
-	'style_loader_src',
-	static function ( string $src ): string {
-		if ( strpos( $src, 'ver=' ) !== false ) {
-			$src = remove_query_arg( 'ver', $src );
-		}
-		return $src;
-	},
-	9999
-);
-
-add_filter(
-	'script_loader_src',
-	static function ( string $src ): string {
-		if ( strpos( $src, 'ver=' ) !== false ) {
-			$src = remove_query_arg( 'ver', $src );
-		}
-		return $src;
-	},
-	9999
-);
+// Намеренно НЕ снимаем ?ver= с JS/CSS — это единственный механизм cache-busting.
+// Без него браузер хранит старую сборку до ручной очистки кеша.

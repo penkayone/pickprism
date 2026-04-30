@@ -12,6 +12,23 @@
 @mixin bp-xl {
   @media (min-width: #{$bp-xl}) { @content; }
 }
+@mixin bp-xxl {
+  @media (min-width: #{$bp-xxl}) { @content; }
+}
+
+// Обратные (max-width) — для адаптивных override-ов.
+@mixin bp-down-md {
+  @media (max-width: #{$bp-md - 1px}) { @content; }
+}
+@mixin bp-down-md2 {
+  @media (max-width: #{$bp-md2 - 1px}) { @content; }
+}
+@mixin bp-down-lg {
+  @media (max-width: #{$bp-lg - 1px}) { @content; }
+}
+@mixin bp-down-xl {
+  @media (max-width: #{$bp-xl - 1px}) { @content; }
+}
 
 @mixin reduced-motion {
   @media (prefers-reduced-motion: reduce) { @content; }

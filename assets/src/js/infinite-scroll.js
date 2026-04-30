@@ -1,6 +1,5 @@
-// Infinite scroll ленты.
-// Подгружает следующую страницу через REST /pickprism/v1/feed.
-// Если JS отключён — работает обычная пагинация (её рендерит PHP).
+// Infinite scroll ленты (редизайн ha-card). Подгружает след. страницу через
+// REST /pickprism/v1/feed. Без JS — работает классическая пагинация от PHP.
 
 const cfg = () => (typeof window !== 'undefined' && window.Pickprism) || {};
 
@@ -13,38 +12,57 @@ const escape = (str) =>
     .replace(/'/g, '&#39;');
 
 function cardHTML(item) {
-  const tags = (item.tags || [])
-    .map(
-      (t) =>
-        `<a class="chip chip--tag chip--sm" href="${escape(t.url)}">#${escape(t.name)}</a>`
-    )
-    .join('');
+  const { i18n = {} } = cfg();
+  const labelNew = i18n.isNew || 'Новое';
+  const labelMin = i18n.minRead || 'мин';
+  const hue = typeof item.hue === 'number' ? item.hue : 24;
+  const categoryName = item.primaryCategory ? item.primaryCategory.name : '';
+  const categoryLetter = categoryName ? categoryName.charAt(0).toUpperCase() : 'P';
 
-  const media = item.thumbnail
-    ? `<a class="card__media" href="${escape(item.url)}" tabindex="-1" aria-hidden="true">
-        <img class="card__img"
+  let cover = '';
+  if (item.thumbnail && item.thumbnail.url) {
+    cover = `
+      <div class="ha-cover">
+        <img class="ha-cover__img"
           src="${escape(item.thumbnail.url)}"
           ${item.thumbnail.srcset ? `srcset="${escape(item.thumbnail.srcset)}"` : ''}
           ${item.thumbnail.sizes ? `sizes="${escape(item.thumbnail.sizes)}"` : ''}
-          width="${escape(item.thumbnail.width)}"
-          height="${escape(item.thumbnail.height)}"
+          width="${escape(item.thumbnail.width || 800)}"
+          height="${escape(item.thumbnail.height || 500)}"
           loading="lazy"
           decoding="async"
           alt="${escape(item.thumbnail.alt || item.title)}"
         />
-      </a>`
-    : '';
+        ${categoryName ? `<span class="ha-cover__cat">${escape(categoryName)}</span>` : ''}
+      </div>
+    `;
+  } else {
+    cover = `
+      <div class="ha-cover" style="--hue: ${hue};">
+        <div class="ha-cover__bg" aria-hidden="true"></div>
+        <div class="ha-cover__letter" aria-hidden="true">${escape(categoryLetter)}</div>
+        ${categoryName ? `<span class="ha-cover__cat">${escape(categoryName)}</span>` : ''}
+      </div>
+    `;
+  }
 
   return `
-    <article class="card card--article reveal" data-post-id="${escape(item.id)}">
-      ${tags ? `<div class="card__tags">${tags}</div>` : ''}
-      <h2 class="card__title"><a href="${escape(item.url)}" rel="bookmark">${escape(item.title)}</a></h2>
-      ${media}
-      <div class="card__excerpt">${escape(item.excerpt || '')}</div>
-      <div class="card__meta">
-        <time datetime="${escape(item.dateIso)}">${escape(item.date)}</time>
+    <a class="ha-card reveal" href="${escape(item.url)}" data-post-id="${escape(item.id)}">
+      ${cover}
+      <div class="ha-card__body">
+        <div class="ha-card__meta">
+          ${item.isNew ? `<span class="ha-card__new">${escape(labelNew)}</span>` : ''}
+          <span class="ha-card__date"><time datetime="${escape(item.dateIso)}">${escape(item.date)}</time></span>
+          <span class="ha-card__dot" aria-hidden="true">·</span>
+          <span class="ha-card__read">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${escape(item.readTime || 1)} ${escape(labelMin)}
+          </span>
+        </div>
+        <h3 class="ha-card__title">${escape(item.title)}</h3>
+        ${item.excerpt ? `<p class="ha-card__excerpt">${escape(item.excerpt)}</p>` : ''}
       </div>
-    </article>
+    </a>
   `;
 }
 
@@ -68,8 +86,6 @@ export function initInfiniteScroll() {
   let ended = false;
   let observer = null;
 
-  // Поддерживаем оба режима: автоподгрузка + кнопка «показать ещё».
-  // Прячем классическую нумерованную пагинацию — JS берёт её функции.
   if (linksBlock) linksBlock.hidden = true;
   if (sentinel) sentinel.hidden = false;
   if (loadMoreBtn) loadMoreBtn.hidden = false;
@@ -85,18 +101,21 @@ export function initInfiniteScroll() {
     if (loadMoreBtn) loadMoreBtn.disabled = true;
 
     const params = new URLSearchParams({
-      type: feed.type || 'home',
-      value: feed.value || '',
+      type: (window.Pickprism && window.Pickprism.feed && window.Pickprism.feed.type) || feed.type || 'home',
+      value: (window.Pickprism && window.Pickprism.feed && window.Pickprism.feed.value) || feed.value || '',
       paged: String(paged),
-      per_page: String(feed.perPage || 10),
+      per_page: String(feed.perPage || 12),
     });
 
     fetch(`${restUrl}feed?${params.toString()}`, {
       credentials: 'same-origin',
       headers: { Accept: 'application/json' },
     })
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      .then(async (r) => {
+        if (!r.ok) {
+          const body = await r.text().catch(() => '');
+          throw new Error(`HTTP ${r.status} ${r.statusText} — ${body.slice(0, 200)}`);
+        }
         return r.json();
       })
       .then((data) => {
@@ -115,7 +134,6 @@ export function initInfiniteScroll() {
         while (holder.firstChild) fragment.appendChild(holder.firstChild);
         list.appendChild(fragment);
 
-        // Регистрируем новые reveal-элементы.
         window.dispatchEvent(new CustomEvent('pickprism:reveal-refresh'));
 
         paged += 1;
@@ -128,8 +146,9 @@ export function initInfiniteScroll() {
           setStatus('');
         }
       })
-      .catch(() => {
-        setStatus(i18n.errorGeneric || 'Ошибка');
+      .catch((err) => {
+        console.error('[pickprism] feed fetch failed', err);
+        setStatus((i18n.errorGeneric || 'Ошибка') + ' (' + (err && err.message ? err.message : 'unknown') + ')');
       })
       .finally(() => {
         isLoading = false;

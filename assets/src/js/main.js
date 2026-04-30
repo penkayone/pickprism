@@ -1,10 +1,11 @@
-// Pickprism — entry point.
+// Pickprism — entry point (редизайн pressaff-style).
 import '../scss/main.scss';
 
 import { initSearch } from './search.js';
 import { initInfiniteScroll } from './infinite-scroll.js';
 import { initRevealAnimations } from './animations.js';
 import { initComments } from './comments.js';
+import { initReadingProgress } from './reading-progress.js';
 
 const ready = (fn) => {
   if (document.readyState !== 'loading') {
@@ -18,8 +19,42 @@ ready(() => {
   document.documentElement.classList.remove('no-js');
   document.documentElement.classList.add('has-js');
 
+  // Всегда — search (в шапке на всех страницах).
   initSearch();
-  initInfiniteScroll();
+
+  // Reveal-анимации для .reveal-элементов — всегда.
   initRevealAnimations();
-  initComments();
+
+  // Лента / infinite scroll — только если на странице есть feed-container.
+  if (document.querySelector('[data-feed-container]')) {
+    initInfiniteScroll();
+  }
+
+  // Reading progress — только на single post.
+  if (document.querySelector('[data-reading-progress]')) {
+    initReadingProgress();
+  }
+
+  // Comments — только если есть форма/список.
+  if (document.querySelector('.comment-form') || document.querySelector('.pa-clist')) {
+    initComments();
+  }
+
+  // Копирование ссылки (mobile share bar + share-horizontal).
+  document.querySelectorAll('[data-copy-link]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = btn.dataset.copyLink || '';
+      if (!url || !navigator.clipboard) return;
+      navigator.clipboard.writeText(url).then(() => {
+        const original = btn.getAttribute('aria-label') || '';
+        btn.setAttribute('aria-label', 'Скопировано');
+        btn.style.color = 'var(--c-accent)';
+        setTimeout(() => {
+          btn.setAttribute('aria-label', original);
+          btn.style.color = '';
+        }, 1600);
+      });
+    });
+  });
 });

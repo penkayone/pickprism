@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Используется для cache-busting ассетов и в REST-ответах.
  */
 if ( ! defined( 'PICKPRISM_VERSION' ) ) {
-	define( 'PICKPRISM_VERSION', '1.0.0' );
+	define( 'PICKPRISM_VERSION', '1.1.0' );
 }
 
 if ( ! defined( 'PICKPRISM_DIR' ) ) {
@@ -46,9 +46,11 @@ pickprism_require_modules(
 		'security',
 		'query-optimizations',
 		'caching',
+		'template-helpers',
 		'sticky',
 		'ajax-search',
 		'comments',
+		'categories-page',
 		'fixtures',
 	)
 );

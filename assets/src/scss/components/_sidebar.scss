@@ -1,89 +1,393 @@
+@use '../abstracts/tokens' as *;
 @use '../abstracts/mixins' as *;
 
+// ══════════════════════════════════════════════════════════════════════════
+// Единый sidebar на 4 блока (categories, trending, newsletter, tags).
+// Используется и на home, и на single. Sticky top: 24px, скрывается на ≤960.
+// ══════════════════════════════════════════════════════════════════════════
+.ha-side {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #ded6c8 transparent;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background: #ded6c8; border-radius: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+
+  @include bp-down-xl {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    // Ключевой CTA-блок отдельной строкой — оставляем на span 1.
+    .ha-side__nl { grid-column: span 1; }
+  }
+
+  @include bp-down-md2 {
+    grid-template-columns: 1fr;
+  }
+
+  // На single sidebar скрывается на mobile (контент важнее).
+  body.single-post &,
+  .pa-main--with-sidebar & {
+    @include bp-down-lg { display: none; }
+  }
+}
+
+.ha-side__block {
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-xl);
+  padding: 22px;
+}
+
+.ha-side__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ha-side__title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-weight: var(--fw-extrabold);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--c-text);
+}
+
+.ha-side__all {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: var(--fw-semibold);
+  color: var(--c-text-subtle);
+  text-decoration: none;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  transition: color var(--dur-fast) var(--ease-out);
+
+  &:hover { color: var(--c-accent); }
+}
+
+// ── Categories ─────────────────────────────────────────────────────────────
+.ha-side__cats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 10px;
+    margin: 0 -10px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--c-text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: var(--fw-medium);
+    transition:
+      background 160ms var(--ease-out),
+      color 160ms var(--ease-out);
+
+    &:hover {
+      background: var(--c-accent-soft);
+      color: var(--c-accent);
+    }
+
+    &:hover .ha-side__cat-icon {
+      transform: scale(1.06) rotate(-3deg);
+    }
+
+    &:hover .ha-side__cat-count {
+      background: #fff;
+      color: var(--c-accent);
+    }
+  }
+}
+
+.ha-side__cat-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: hsl(var(--hue, 24) 90% 95%);
+  color: hsl(var(--hue, 24) 70% 42%);
+  transition: transform 180ms var(--ease-out);
+}
+
+.ha-side__cat-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ha-side__cat-count {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: var(--fw-semibold);
+  color: var(--c-text-subtle);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--c-bg-home);
+  transition:
+    background 160ms var(--ease-out),
+    color 160ms var(--ease-out);
+}
+
+.ha-side__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-accent);
+  box-shadow: 0 0 0 0 rgba(255, 122, 26, 0.5);
+  animation: ha-side-pulse 1.8s ease-out infinite;
+  flex-shrink: 0;
+
+  @include reduced-motion { animation: none; }
+}
+
+@keyframes ha-side-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 122, 26, 0.5); }
+  80% { box-shadow: 0 0 0 8px rgba(255, 122, 26, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 122, 26, 0); }
+}
+
+// ── Trending list ──────────────────────────────────────────────────────────
+.ha-side__trending {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li + li {
+    border-top: 1px dashed var(--c-border);
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+
+  a {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 12px;
+    text-decoration: none;
+    transition: transform var(--dur-fast) var(--ease-out);
+
+    &:hover { transform: translateX(2px); }
+    &:hover .ha-side__tt { color: var(--c-accent); }
+  }
+}
+
+.ha-side__num {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: 20px;
+  color: var(--c-accent);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ha-side__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ha-side__tag {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-accent-text);
+}
+
+.ha-side__tt {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--c-text);
+  letter-spacing: -0.01em;
+  transition: color var(--dur-fast) var(--ease-out);
+  @include clamp-lines(2);
+}
+
+.ha-side__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--c-text-subtle);
+}
+
+// ── Newsletter ────────────────────────────────────────────────────────────
+.ha-side__nl {
+  background: var(--c-dark-2);
+  border-color: var(--c-dark-2);
+  color: #fff;
+
+  &-ico {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 122, 26, 0.18);
+    color: var(--c-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  &-title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+
+  &-text {
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  &-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+
+    input {
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      outline: none;
+      transition:
+        border-color var(--dur-fast) var(--ease-out),
+        background var(--dur-fast) var(--ease-out);
+
+      &::placeholder { color: rgba(255, 255, 255, 0.45); }
+
+      &:focus {
+        border-color: var(--c-accent);
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    button {
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--c-accent);
+      color: #fff;
+      font-family: var(--font-sans);
+      font-weight: var(--fw-bold);
+      font-size: 13.5px;
+      cursor: pointer;
+      transition:
+        background var(--dur-fast) var(--ease-out),
+        transform var(--dur-fast) var(--ease-out);
+
+      &:hover {
+        background: var(--c-accent-hover);
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  &-note {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+    text-align: center;
+  }
+}
+
+// ── Tags (in sidebar) ─────────────────────────────────────────────────────
+.ha-side__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ha-side__tagitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 11px;
+  border-radius: var(--radius-full);
+  background: var(--c-bg-soft);
+  color: var(--c-text-2);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+
+  span {
+    color: var(--c-accent);
+    font-weight: var(--fw-extrabold);
+  }
+
+  &:hover {
+    background: var(--c-dark-2);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// Legacy sidebar (для совместимости с archive/search/tag — упрощённо)
+// ══════════════════════════════════════════════════════════════════════════
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: var(--sp-6);
 
-  @include bp-lg {
-    position: sticky;
-    top: calc(64px + var(--sp-5));
-    align-self: start;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
-    padding-right: var(--sp-2);
-  }
-
   &__block {
-    background: #fff;
+    background: var(--c-bg-card);
     border: 1px solid var(--c-border);
     border-radius: var(--radius-lg);
     padding: var(--sp-5);
   }
 
   &__title {
+    font-family: var(--font-display);
     font-size: var(--fs-md);
     margin-bottom: var(--sp-4);
     color: var(--c-text);
-  }
-
-  &__popular-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-    counter-reset: popular;
-  }
-
-  &__popular-item {
-    display: flex;
-    gap: var(--sp-3);
-    counter-increment: popular;
-    position: relative;
-  }
-
-  &__popular-thumb {
-    flex-shrink: 0;
-    width: 64px;
-    height: 64px;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: var(--c-bg-muted);
-    img { width: 100%; height: 100%; object-fit: cover; }
-  }
-
-  &__popular-body { min-width: 0; flex: 1; }
-
-  &__popular-title {
-    display: block;
-    font-weight: var(--fw-semibold);
-    font-size: var(--fs-sm);
-    color: var(--c-text);
-    margin-bottom: 4px;
-    line-height: var(--lh-snug);
-    @include clamp-lines(3);
-    &:hover { color: var(--c-accent); }
-  }
-
-  &__popular-meta {
-    font-size: var(--fs-xs);
-    color: var(--c-text-subtle);
-  }
-
-  &__widgets {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-  }
-}
-
-.widget {
-  background: #fff;
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-5);
-
-  &__title {
-    font-size: var(--fs-md);
-    margin-bottom: var(--sp-3);
   }
 }

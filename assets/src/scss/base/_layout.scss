@@ -1,24 +1,47 @@
+@use '../abstracts/tokens' as *;
 @use '../abstracts/mixins' as *;
 
-.container {
+// Универсальные контейнеры — используем и старые классы (.container)
+// и новые pressaff-стиля (.pa-container, .ha-container).
+
+.container,
+.pa-container {
   width: 100%;
   max-width: var(--container-max);
   margin-inline: auto;
-  padding-inline: var(--container-px);
+  padding-inline: var(--sp-6);
+
+  @include bp-lg {
+    padding-inline: var(--sp-8);
+  }
+}
+
+// ha-container — шире, специально для home (1320).
+.ha-container {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding: var(--sp-10) var(--sp-7);
+
+  @include bp-down-md2 {
+    padding: var(--sp-9) var(--sp-5);
+  }
 }
 
 .site-main {
   padding-block: var(--sp-7) var(--sp-9);
 }
 
+// Legacy-флекс для archive/search/tag, сохраняем грид с боковой колонкой.
 .layout-with-sidebar {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--sp-7);
+  gap: var(--sp-8);
 
-  @include bp-lg {
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: var(--sp-8);
+  @include bp-xl {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--sp-9);
+    align-items: start;
   }
 }
 
@@ -28,9 +51,10 @@
   border-bottom: 1px solid var(--c-border);
 
   &__title {
+    font-family: var(--font-display);
     font-size: var(--fs-2xl);
     margin-bottom: var(--sp-2);
-    @include bp-md { font-size: var(--fs-3xl); }
+    @include bp-lg { font-size: var(--fs-3xl); }
   }
   &__desc {
     color: var(--c-text-muted);
@@ -43,4 +67,95 @@
   padding: var(--sp-9) var(--sp-4);
   &__title { font-size: var(--fs-2xl); margin-bottom: var(--sp-3); }
   &__text  { color: var(--c-text-muted); }
+}
+
+// Страница home в редизайне — свой фон.
+.ha-page {
+  background: var(--c-bg-home);
+  min-height: 100vh;
+}
+
+// Layout-wrapper с sidebar — новый дизайн.
+.ha-withside {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--sp-9);
+  align-items: start;
+
+  // feed должен уметь сжиматься
+  > .ha-feed { min-width: 0; }
+
+  @include bp-down-xl {
+    grid-template-columns: 1fr;
+    gap: var(--sp-10);
+  }
+}
+
+// Section head (общее для home/article).
+.ha-sec-head,
+.pa-sec-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin: 0 0 var(--sp-6);
+
+  &__title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-2xl);
+    letter-spacing: -0.025em;
+    color: var(--c-text);
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  &__count {
+    display: inline-block;
+    margin-left: var(--sp-2);
+    padding: 2px var(--sp-3);
+    border-radius: var(--radius-full);
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: var(--fw-bold);
+    vertical-align: middle;
+  }
+
+  &__line {
+    flex: 1;
+    height: 1px;
+    background: var(--c-border-strong);
+  }
+
+  &__link {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-2);
+    white-space: nowrap;
+    transition: color var(--dur-fast) var(--ease-out);
+
+    &:hover { color: var(--c-accent); }
+  }
+}
+
+// Article-вариант section head — линия с градиентом, ссылка оранжевая.
+.pa-sec-head__line {
+  background: linear-gradient(90deg, var(--c-accent-soft-2), transparent);
+  height: 2px;
+  border-radius: var(--radius-full);
+}
+.pa-sec-head__link { color: var(--c-accent); font-weight: var(--fw-semibold); }
+.pa-sec-head__link:hover { color: var(--c-accent-hover); transform: translateX(2px); }
+
+@include bp-down-md2 {
+  .ha-sec-head,
+  .pa-sec-head {
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+
+    &__line { display: none; }
+    &__title { font-size: var(--fs-xl); }
+  }
 }
