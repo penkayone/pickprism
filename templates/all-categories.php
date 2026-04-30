@@ -54,9 +54,18 @@ get_header();
 
 					$pickprism_hue    = pickprism_term_hue( $pickprism_term );
 					$pickprism_letter = mb_strtoupper( mb_substr( $pickprism_term->name, 0, 1, 'UTF-8' ), 'UTF-8' );
-					$pickprism_count  = (int) $pickprism_term->count;
+					$pickprism_count = (int) $pickprism_term->count;
+					$pickprism_mod10 = $pickprism_count % 10;
+					$pickprism_mod100 = $pickprism_count % 100;
+					if ( $pickprism_mod10 === 1 && $pickprism_mod100 !== 11 ) {
+						$pickprism_tpl = __( '%d статья', 'pickprism' );
+					} elseif ( $pickprism_mod10 >= 2 && $pickprism_mod10 <= 4 && ( $pickprism_mod100 < 12 || $pickprism_mod100 > 14 ) ) {
+						$pickprism_tpl = __( '%d статьи', 'pickprism' );
+					} else {
+						$pickprism_tpl = __( '%d статей', 'pickprism' );
+					}
 					/* translators: %d: number of posts in category. */
-					$pickprism_label = sprintf( _n( '%d статья', '%d статей', $pickprism_count, 'pickprism' ), $pickprism_count );
+					$pickprism_label = sprintf( $pickprism_tpl, $pickprism_count );
 					?>
 					<li class="pa-allcats__item">
 						<a

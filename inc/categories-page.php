@@ -77,6 +77,20 @@ function pickprism_categories_template_include( string $template ): string {
 add_filter( 'template_include', 'pickprism_categories_template_include' );
 
 /**
+ * Подменяет `<title>` для страницы /categories/.
+ *
+ * @param array<string,string> $parts
+ * @return array<string,string>
+ */
+function pickprism_categories_document_title( array $parts ): array {
+	if ( (int) get_query_var( PICKPRISM_CATEGORIES_QV ) === 1 ) {
+		$parts['title'] = __( 'Все категории', 'pickprism' );
+	}
+	return $parts;
+}
+add_filter( 'document_title_parts', 'pickprism_categories_document_title' );
+
+/**
  * Сброс rewrite-rules один раз — на первой загрузке после активации/обновления.
  * Используется transient-флаг, чтобы избежать flush на каждом запросе
  * (он дорогой: пересобирает все правила).
