@@ -38,6 +38,21 @@ $title_allowed = array(
 	'span' => array( 'class' => array() ),
 );
 
+// Подкрашенный span на фронте. Источников несколько:
+//   1) `**фраза**` — ручной markdown-like синтаксис.
+//   2) <em>/<i>/<strong>/<b> — если WP/ACF/плагин превратил звёздочки в курсив
+//      или пользователь вставил эти теги сам.
+// Все они конвертируются в <span class="ha-hero__title--accent">. wp_kses ниже
+// почистит всё остальное.
+$hero_title = (string) preg_replace(
+	array(
+		'/\*\*(.+?)\*\*/u',
+		'~<(?:em|i|strong|b)\b[^>]*>(.+?)</(?:em|i|strong|b)>~iu',
+	),
+	'<span class="ha-hero__title--accent">$1</span>',
+	$hero_title
+);
+
 $has_title = trim( wp_strip_all_tags( $hero_title ) ) !== '';
 ?>
 <section
