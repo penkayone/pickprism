@@ -27,6 +27,9 @@
 // Standalone-страницы.
 @use 'components/all-categories';
 
+// Глобальные UI-элементы.
+@use 'components/scroll-top';
+
 // Прочее (legacy).
 @use 'components/chips';
 @use 'components/search-form';

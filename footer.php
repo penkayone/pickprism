@@ -155,6 +155,8 @@ if ( $pickprism_tg_url !== '' ) {
 	</div>
 </footer>
 
+<?php get_template_part( 'template-parts/scroll-top' ); ?>
+
 <?php wp_footer(); ?>
 </body>
 </html>

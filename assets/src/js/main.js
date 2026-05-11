@@ -6,6 +6,7 @@ import { initInfiniteScroll } from './infinite-scroll.js';
 import { initRevealAnimations } from './animations.js';
 import { initComments } from './comments.js';
 import { initReadingProgress } from './reading-progress.js';
+import { initScrollTop } from './scroll-top.js';
 
 const ready = (fn) => {
   if (document.readyState !== 'loading') {
@@ -24,6 +25,9 @@ ready(() => {
 
   // Reveal-анимации для .reveal-элементов — всегда.
   initRevealAnimations();
+
+  // Кнопка «Наверх» — всегда, JS сам проверит наличие [data-scroll-top].
+  initScrollTop();
 
   // Лента / infinite scroll — только если на странице есть feed-container.
   if (document.querySelector('[data-feed-container]')) {
