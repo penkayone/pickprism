@@ -51,6 +51,7 @@ pickprism_require_modules(
 		'ajax-search',
 		'comments',
 		'categories-page',
+		'acf',
 		'fixtures',
 	)
 );

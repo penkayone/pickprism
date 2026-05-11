@@ -1,0 +1,66 @@
+@use '../abstracts/tokens' as *;
+@use '../abstracts/mixins' as *;
+
+// ── Кнопка «Наверх» ────────────────────────────────────────────────────────
+// Появляется при прокрутке > 400px. JS убирает атрибут [hidden] и переключает
+// класс .is-visible. До инициализации скрипта кнопки в DOM нет.
+.pa-scroll-top {
+  position: fixed;
+  right: var(--sp-5);
+  bottom: var(--sp-5);
+  z-index: var(--z-mobile-bar);
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--c-accent);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  box-shadow: 0 10px 28px rgba(255, 122, 26, 0.32), 0 2px 6px rgba(20, 23, 31, 0.12);
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  &:hover {
+    background: var(--c-accent-hover);
+    box-shadow: 0 14px 32px rgba(255, 122, 26, 0.4), 0 3px 8px rgba(20, 23, 31, 0.14);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+
+  svg { display: block; }
+
+  // На мобильных поднимаем выше mobile-share-bar (она появляется только на single).
+  @include bp-down-lg {
+    right: var(--sp-4);
+    bottom: var(--sp-4);
+
+    .single-post & {
+      bottom: calc(64px + env(safe-area-inset-bottom));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: opacity var(--dur-fast) linear;
+    transform: none;
+    &.is-visible { transform: none; }
+  }
+}

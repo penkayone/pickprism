@@ -8,7 +8,7 @@
 - **Frontend:** Vite + SCSS + Vanilla JS (без React/Vue/Tailwind)
 - **Анимации:** CSS transitions + IntersectionObserver (без GSAP)
 - **Шрифты:** Inter (body) + Manrope (display) через Google Fonts + preconnect (TODO: self-host)
-- **Плагины-соседи:** LiteSpeed Cache, Rank Math SEO (знает о `rank_math_primary_category`), Wordfence
+- **Плагины-соседи:** LiteSpeed Cache, Rank Math SEO (знает о `rank_math_primary_category`), Wordfence, **ACF PRO** (Options Page «Настройки сайта» с вкладками — см. `inc/acf.php`)
 
 ## Команды
 
@@ -47,7 +47,10 @@ pickprism/
 │   ├── cleanup.php                         Отключение emoji, embeds, XML-RPC
 │   ├── security.php                        Headers, nonce, escape/sanitize хелперы
 │   ├── comments.php                        callback на .pa-comment/.pa-reply, бейдж «Автор», REST-endpoint подачи
+│   ├── acf.php                             ← НОВОЕ (2026-05-11): load/save JSON в /acf/, Options Page «Настройки сайта» с вкладками (ACF PRO)
 │   └── fixtures.php                        WP-CLI команды для тестовых данных
+├── acf/                                    ACF local JSON — группы полей (коммитятся в git, синхронизируются автоматически)
+│   └── group_pickprism_hero_home.json      Группа «Настройки сайта». Вкладки: Hero (kicker / title / lead / primary CTA / secondary CTA), Футер (описание / 3 заголовка колонок / copyright)
 ├── assets/
 │   ├── src/scss/
 │   │   ├── abstracts/_tokens.scss          ДИЗАЙН-ТОКЕНЫ (orange accent, Manrope + Inter) — править дизайн отсюда
@@ -75,6 +78,8 @@ pickprism/
 | **Бейдж «Автор»** в комментариях (редизайн) | Коммент помечен как авторский если email совпадает с email автора поста (user_id всегда 0 в анонимном режиме). |
 | **Primary category** через Rank Math | meta-ключ `rank_math_primary_category` → fallback `get_the_category()[0]`. |
 | **Страница /categories/** (2026-04-29) | Не page-объект — отдельный rewrite-rule + query-var + template_include на `templates/all-categories.php`. Flush rewrite один раз через transient `pickprism_categories_rewrite_flushed` + повторно на `after_switch_theme`. Не зависит от опций WP, переживает реимпорт БД. |
+| **Hero главной через ACF** (2026-05-11) | Контент управляется через ACF PRO Options Page «Настройки сайта» (`pickprism-settings`), вкладка **Hero**. Поля: `hero_kicker` (text), `hero_title` (textarea, разрешены `<br>` и `<span class="ha-hero__title--accent">` через `wp_kses`; синтаксис `**фраза**` или `<em>…</em>`/`<strong>` автоматически конвертируется в подкрашенный span), `hero_lead` (textarea), `hero_cta_primary{label,url}`, `hero_cta_secondary{label,url}` (group). Без fallback — пустые поля не рендерятся. Группа хранится как local JSON в `/acf/` (load + save), коммитится в git. Структура с вкладками подготовлена под будущие разделы. |
+| **Футер через ACF + 3 menu locations** (2026-05-12) | Вкладка **Футер**: `footer_description` (textarea, fallback на `bloginfo('description')`), `footer_col1_title` / `footer_col2_title` / `footer_col3_title` (text, fallback на «Рубрики»/«Проект»/«Сервисы»), `footer_copyright` (text с плейсхолдерами `{year}` и `{site}`, fallback на «© {year} {site}. Все права защищены.»). Старая локация `footer` заменена на 3 новых: `footer-1` / `footer-2` / `footer-3` — каждая колонка футера это отдельное nav-menu. Если меню не назначено — колонка не выводится. |
 
 ## Дизайн
 
@@ -141,6 +146,23 @@ pickprism/
   - Из `template-parts/hero-home.php` удалён блок `.ha-hero__stats` (3 цифры: статьи / авторы / частота обновлений) вместе с инлайн-подсчётом `wp_count_posts` + `get_users(has_published_posts)`. Линия-разделитель над цифрами (`border-top` на `.ha-hero__stats`) и вертикальные `.ha-hero__stats-sep` ушли вместе со стилями.
   - В `assets/src/scss/components/_hero.scss` удалены селекторы `&__stats` и `&__stats-sep`. У `&__ctas` убран лишний `margin-bottom: 48px` — отступ снизу теперь обеспечивает `padding` секции.
   - Hero теперь: kicker → title → lead → CTAs.
+
+- **2026-05-12** — Футер переведён на ACF + 3 menu locations (ветка `feature/redesign`):
+  - `inc/setup.php` → `register_nav_menus`: убрана локация `footer`, зарегистрированы три новых: `footer-1`, `footer-2`, `footer-3` («Футер · Колонка 1/2/3»). Каждая колонка футера = отдельное nav-menu. **Migration:** после деплоя нужно зайти в Внешний вид → Меню и заново привязать меню к новым локациям (старая привязка к `footer` отвалится).
+  - В `acf/group_pickprism_hero_home.json` добавлен tab «Футер» (`field_pickprism_tab_footer`) с полями: `footer_description` (textarea), `footer_col1_title` / `footer_col2_title` / `footer_col3_title` (text, ширина wrapper'а 33%), `footer_copyright` (text с подсказкой про плейсхолдеры).
+  - `footer.php` переписан:
+    - Описание под лого: ACF `footer_description` → fallback на `bloginfo('description')`. Тег `<p>` не рендерится, если оба пусты.
+    - 3 колонки рендерятся в цикле `for $i=1..3`: `has_nav_menu( "footer-$i" )` — иначе колонка не выводится. Заголовок берётся из `footer_col{N}_title` с fallback на хардкод-дефолт. Меню — через `wp_nav_menu` с `items_wrap='<ul>%3$s</ul>'`, `depth=1`, `fallback_cb='__return_empty_string'`.
+    - Copyright: ACF `footer_copyright` → fallback на дефолтную локализованную строку. Плейсхолдеры `{year}` / `{site}` подставляются через `strtr()`.
+    - Удалены fallback-массивы `$footer_menu_project` / `$footer_menu_services` и подгрузка `$top_cats` (теперь всё через назначенные меню).
+  - Соц. ссылки в брэнд-блоке остались на `theme_mod` (`pickprism_telegram_url` / `pickprism_reddit_url`) — не были в скоупе задачи.
+
+- **2026-05-11** — Hero главной переведён на ACF (ветка `feature/redesign`):
+  - Новый модуль `inc/acf.php` — регистрация путей load/save JSON в папку `/acf/` (всё хранится в репозитории, синкается через ACF PRO local JSON) и Options Page **«Настройки сайта»** (`menu_slug=pickprism-settings`, capability `edit_theme_options`, иконка `dashicons-admin-generic`). Если ACF PRO отсутствует — модуль молча выходит.
+  - Группа `acf/group_pickprism_hero_home.json` (title «Настройки сайта»). Поля разделены ACF tab-полями для будущего расширения. Сейчас одна вкладка **Hero** (`field_pickprism_tab_hero`, `placement: top`) с полями: `hero_kicker` (text), `hero_title` (textarea, инструкция про разрешённые `<br>` и `<span class="ha-hero__title--accent">`), `hero_lead` (textarea), `hero_cta_primary` (group: label + url), `hero_cta_secondary` (group: label + url). Для добавления нового раздела — новый field `type=tab` + поля под ним.
+  - `template-parts/hero-home.php` переписан: значения тянутся из `get_field( ..., 'option' )`, каждый блок условный (без fallback на хардкод — пустые поля просто не рендерятся), заголовок проходит через `wp_kses` с whitelist `br + span[class]`, у secondary CTA убрана хардкод-иконка Telegram (кнопка теперь generic). У `<section>` динамически меняется `aria-labelledby` ↔ `aria-label`.
+  - Новый хелпер `pickprism_is_external_url()` в `inc/template-helpers.php` — определяет, нужен ли `target="_blank"` (якоря, относительные пути, mailto/tel считаются внутренними).
+  - `functions.php` — модуль `acf` добавлен в `pickprism_require_modules`.
 
 - **2026-04-29** — Удалён **sidebar-authors** «Авторы недели» (ветка `feature/redesign`):
   - Из `sidebar.php` убран вызов `template-parts/sidebar-authors`. Шапка doc-блока обновлена: «4 блока (categories, trending, newsletter, tags)».

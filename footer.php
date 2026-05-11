@@ -1,38 +1,52 @@
 <?php
 /**
- * Тёмный footer: brand + 3 колонки (Рубрики / Проект / Сервисы) + bottom.
+ * Тёмный footer: brand + 3 колонки-меню + bottom (copyright + правовые ссылки).
+ * Контент колонок управляется через ACF (Настройки сайта → вкладка «Футер»)
+ * + назначение меню в Внешний вид → Меню → Расположение: «Футер · Колонка N».
  *
  * @package Pickprism
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$top_cats = pickprism_get_top_categories( 5 );
+$has_acf = function_exists( 'get_field' );
 
-// Fallback-секции, если меню не настроены.
-$footer_menu_project = array(
-	array(
-		'label' => __( 'О нас', 'pickprism' ),
-		'url'   => '#',
-	),
-	array(
-		'label' => __( 'Редакция', 'pickprism' ),
-		'url'   => '#',
-	),
-	array(
-		'label' => __( 'Контакты', 'pickprism' ),
-		'url'   => '#',
-	),
-);
-
-$footer_menu_services = array();
-$pickprism_tg_url = pickprism_social_url( 'telegram' );
-if ( $pickprism_tg_url !== '' ) {
-	$footer_menu_services[] = array(
-		'label' => __( 'Telegram', 'pickprism' ),
-		'url'   => $pickprism_tg_url,
-	);
+// Описание под логотипом: ACF → fallback на tagline сайта.
+$footer_description = $has_acf ? trim( (string) get_field( 'footer_description', 'option' ) ) : '';
+if ( $footer_description === '' ) {
+	$footer_description = (string) get_bloginfo( 'description' );
 }
+
+// Заголовки колонок: ACF → fallback на исторические названия.
+$footer_col_titles = array(
+	1 => $has_acf ? trim( (string) get_field( 'footer_col1_title', 'option' ) ) : '',
+	2 => $has_acf ? trim( (string) get_field( 'footer_col2_title', 'option' ) ) : '',
+	3 => $has_acf ? trim( (string) get_field( 'footer_col3_title', 'option' ) ) : '',
+);
+$footer_col_defaults = array(
+	1 => __( 'Рубрики', 'pickprism' ),
+	2 => __( 'Проект', 'pickprism' ),
+	3 => __( 'Сервисы', 'pickprism' ),
+);
+foreach ( $footer_col_titles as $i => $t ) {
+	if ( $t === '' ) {
+		$footer_col_titles[ $i ] = $footer_col_defaults[ $i ];
+	}
+}
+
+// Copyright: ACF → fallback. Плейсхолдеры {year} и {site}.
+$footer_copyright_raw = $has_acf ? trim( (string) get_field( 'footer_copyright', 'option' ) ) : '';
+if ( $footer_copyright_raw === '' ) {
+	/* translators: copyright fallback. {year} → текущий год, {site} → название сайта. */
+	$footer_copyright_raw = __( '© {year} {site}. Все права защищены.', 'pickprism' );
+}
+$footer_copyright = strtr(
+	$footer_copyright_raw,
+	array(
+		'{year}' => gmdate( 'Y' ),
+		'{site}' => get_bloginfo( 'name' ),
+	)
+);
 ?>
 
 <?php if ( is_singular( 'post' ) ) : ?>
@@ -52,7 +66,9 @@ if ( $pickprism_tg_url !== '' ) {
 				<span class="pa-logo__mark" aria-hidden="true"><?php echo esc_html( $first_letter ); ?></span>
 				<span class="pa-logo__text"><?php bloginfo( 'name' ); ?></span>
 			</a>
-			<p><?php echo esc_html( get_bloginfo( 'description' ) ); ?></p>
+			<?php if ( $footer_description !== '' ) : ?>
+				<p><?php echo esc_html( $footer_description ); ?></p>
+			<?php endif; ?>
 			<?php
 			$pickprism_socials = array_filter(
 				array(
@@ -78,69 +94,32 @@ if ( $pickprism_tg_url !== '' ) {
 		</div>
 
 		<div class="pa-footer__cols">
-			<?php if ( ! empty( $top_cats ) ) : ?>
+			<?php for ( $i = 1; $i <= 3; $i++ ) :
+				$location = 'footer-' . $i;
+				if ( ! has_nav_menu( $location ) ) {
+					continue;
+				}
+				?>
 				<div>
-					<div class="pa-footer__title"><?php esc_html_e( 'Рубрики', 'pickprism' ); ?></div>
-					<ul>
-						<?php foreach ( $top_cats as $cat ) :
-							$link = get_term_link( $cat );
-							if ( is_wp_error( $link ) ) {
-								continue;
-							}
-							?>
-							<li>
-								<a href="<?php echo esc_url( $link ); ?>">
-									<?php echo esc_html( $cat->name ); ?>
-								</a>
-							</li>
-						<?php endforeach; ?>
-					</ul>
-				</div>
-			<?php endif; ?>
-
-			<?php if ( has_nav_menu( 'footer' ) ) : ?>
-				<div>
-					<div class="pa-footer__title"><?php esc_html_e( 'Проект', 'pickprism' ); ?></div>
+					<div class="pa-footer__title"><?php echo esc_html( $footer_col_titles[ $i ] ); ?></div>
 					<?php
 					wp_nav_menu(
 						array(
-							'theme_location' => 'footer',
+							'theme_location' => $location,
 							'container'      => false,
 							'items_wrap'     => '<ul>%3$s</ul>',
 							'depth'          => 1,
+							'fallback_cb'    => '__return_empty_string',
 						)
 					);
 					?>
 				</div>
-			<?php else : ?>
-				<div>
-					<div class="pa-footer__title"><?php esc_html_e( 'Проект', 'pickprism' ); ?></div>
-					<ul>
-						<?php foreach ( $footer_menu_project as $it ) : ?>
-							<li><a href="<?php echo esc_url( $it['url'] ); ?>"><?php echo esc_html( $it['label'] ); ?></a></li>
-						<?php endforeach; ?>
-					</ul>
-				</div>
-			<?php endif; ?>
-
-			<div>
-				<div class="pa-footer__title"><?php esc_html_e( 'Сервисы', 'pickprism' ); ?></div>
-				<ul>
-					<?php foreach ( $footer_menu_services as $it ) : ?>
-						<li><a href="<?php echo esc_url( $it['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $it['label'] ); ?></a></li>
-					<?php endforeach; ?>
-				</ul>
-			</div>
+			<?php endfor; ?>
 		</div>
 	</div>
 
 	<div class="pa-footer__bottom">
-		<span>
-			<?php
-			/* translators: %1$s: year %2$s: site name */
-			echo esc_html( sprintf( __( '© %1$s %2$s. Все права защищены.', 'pickprism' ), gmdate( 'Y' ), get_bloginfo( 'name' ) ) );
-			?>
-		</span>
+		<span><?php echo esc_html( $footer_copyright ); ?></span>
 		<div class="pa-footer__legal">
 			<?php if ( get_privacy_policy_url() ) : ?>
 				<a href="<?php echo esc_url( get_privacy_policy_url() ); ?>"><?php esc_html_e( 'Политика конфиденциальности', 'pickprism' ); ?></a>
@@ -154,6 +133,8 @@ if ( $pickprism_tg_url !== '' ) {
 		</div>
 	</div>
 </footer>
+
+<?php get_template_part( 'template-parts/scroll-top' ); ?>
 
 <?php wp_footer(); ?>
 </body>
