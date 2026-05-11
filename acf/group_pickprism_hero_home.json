@@ -1,0 +1,139 @@
+{
+    "key": "group_pickprism_hero_home",
+    "title": "Настройки сайта",
+    "fields": [
+        {
+            "key": "field_pickprism_tab_hero",
+            "label": "Главная страница",
+            "name": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_pickprism_hero_kicker",
+            "label": "Kicker",
+            "name": "hero_kicker",
+            "type": "text",
+            "instructions": "Плашка над заголовком. Например: «Медиа про технологии и разработку · обновляется ежедневно».",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "default_value": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": "",
+            "maxlength": ""
+        },
+        {
+            "key": "field_pickprism_hero_title",
+            "label": "Заголовок",
+            "name": "hero_title",
+            "type": "textarea",
+            "instructions": "Допускаются переносы строк (<br>) и подкрашенный фрагмент через <span class=\"ha-hero__title--accent\">…</span>. Другие теги будут вырезаны.",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "rows": 4,
+            "new_lines": ""
+        },
+        {
+            "key": "field_pickprism_hero_lead",
+            "label": "Подзаголовок (lead)",
+            "name": "hero_lead",
+            "type": "text",
+            "instructions": "Текстовый абзац под заголовком.",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "default_value": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": "",
+            "maxlength": ""
+        },
+        {
+            "key": "field_pickprism_hero_cta_primary",
+            "label": "Главная кнопка (CTA)",
+            "name": "hero_cta_primary",
+            "type": "group",
+            "instructions": "Показывается, если заполнены оба поля.",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "layout": "block",
+            "sub_fields": [
+                {
+                    "key": "field_pickprism_hero_cta_primary_label",
+                    "label": "Текст кнопки",
+                    "name": "label",
+                    "type": "text",
+                    "wrapper": { "width": "50", "class": "", "id": "" },
+                    "default_value": "",
+                    "placeholder": "Например: Читать ленту"
+                },
+                {
+                    "key": "field_pickprism_hero_cta_primary_url",
+                    "label": "Ссылка",
+                    "name": "url",
+                    "type": "text",
+                    "instructions": "Полный URL или якорь (#feed).",
+                    "wrapper": { "width": "50", "class": "", "id": "" },
+                    "default_value": "",
+                    "placeholder": "#feed"
+                }
+            ]
+        },
+        {
+            "key": "field_pickprism_hero_cta_secondary",
+            "label": "Вторая кнопка (CTA)",
+            "name": "hero_cta_secondary",
+            "type": "group",
+            "instructions": "Показывается, если заполнены оба поля.",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "layout": "block",
+            "sub_fields": [
+                {
+                    "key": "field_pickprism_hero_cta_secondary_label",
+                    "label": "Текст кнопки",
+                    "name": "label",
+                    "type": "text",
+                    "wrapper": { "width": "50", "class": "", "id": "" },
+                    "default_value": "",
+                    "placeholder": "Например: Telegram"
+                },
+                {
+                    "key": "field_pickprism_hero_cta_secondary_url",
+                    "label": "Ссылка",
+                    "name": "url",
+                    "type": "text",
+                    "wrapper": { "width": "50", "class": "", "id": "" },
+                    "default_value": "",
+                    "placeholder": "https://t.me/…"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "pickprism-settings"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Глобальные настройки темы. Каждая вкладка отвечает за свой блок.",
+    "show_in_rest": 0,
+    "modified": 1778716800
+}

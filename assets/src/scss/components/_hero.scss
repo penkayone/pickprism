@@ -177,21 +177,17 @@
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// ARTICLE HERO — full-bleed, min-height 620-680px
+// ARTICLE HERO — full-bleed
 // ══════════════════════════════════════════════════════════════════════════
 .pa-hero {
   position: relative;
   overflow: hidden;
 
   &--full {
-    padding-block: 0;
-    min-height: 620px;
+    padding-block: var(--sp-8) var(--sp-7);
     display: flex;
     align-items: flex-end;
     color: #fff;
-
-    @include bp-lg { min-height: 680px; }
-    @include bp-down-lg { min-height: 520px; }
   }
 
   &__full-bg {

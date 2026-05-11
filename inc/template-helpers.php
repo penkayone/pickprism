@@ -272,3 +272,29 @@ function pickprism_social_url( string $network ): string {
 	$url = (string) get_theme_mod( $key, '' );
 	return $url !== '' && filter_var( $url, FILTER_VALIDATE_URL ) ? $url : '';
 }
+
+/**
+ * URL ведёт на внешний домен? Якоря (#), mailto:/tel: и относительные пути
+ * считаются внутренними — для них target="_blank" не нужен.
+ *
+ * @param string $url
+ * @return bool
+ */
+function pickprism_is_external_url( string $url ): bool {
+	$url = trim( $url );
+	if ( $url === '' ) {
+		return false;
+	}
+	if ( strpos( $url, '#' ) === 0 || strpos( $url, '/' ) === 0 ) {
+		return false;
+	}
+	if ( preg_match( '~^(mailto:|tel:)~i', $url ) ) {
+		return false;
+	}
+	$host = wp_parse_url( $url, PHP_URL_HOST );
+	if ( ! $host ) {
+		return false;
+	}
+	$site_host = wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+	return strcasecmp( $host, (string) $site_host ) !== 0;
+}
