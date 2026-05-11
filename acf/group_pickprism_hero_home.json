@@ -115,6 +115,75 @@
                     "placeholder": "https://t.me/…"
                 }
             ]
+        },
+        {
+            "key": "field_pickprism_tab_footer",
+            "label": "Футер",
+            "name": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_pickprism_footer_description",
+            "label": "Описание под логотипом",
+            "name": "footer_description",
+            "type": "textarea",
+            "instructions": "Короткий абзац под логотипом в футере. Если оставить пустым — будет использован «Краткое описание» сайта (Настройки → Общие → Краткое описание).",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "rows": 3,
+            "new_lines": ""
+        },
+        {
+            "key": "field_pickprism_footer_col1_title",
+            "label": "Колонка 1 · заголовок",
+            "name": "footer_col1_title",
+            "type": "text",
+            "instructions": "Меню для этой колонки настраивается в «Внешний вид → Меню → Расположение: Футер · Колонка 1». Если меню не назначено — колонка не выводится.",
+            "required": 0,
+            "wrapper": { "width": "33", "class": "", "id": "" },
+            "default_value": "Рубрики",
+            "placeholder": "Рубрики"
+        },
+        {
+            "key": "field_pickprism_footer_col2_title",
+            "label": "Колонка 2 · заголовок",
+            "name": "footer_col2_title",
+            "type": "text",
+            "instructions": "Меню для этой колонки — «Внешний вид → Меню → Расположение: Футер · Колонка 2».",
+            "required": 0,
+            "wrapper": { "width": "33", "class": "", "id": "" },
+            "default_value": "Проект",
+            "placeholder": "Проект"
+        },
+        {
+            "key": "field_pickprism_footer_col3_title",
+            "label": "Колонка 3 · заголовок",
+            "name": "footer_col3_title",
+            "type": "text",
+            "instructions": "Меню для этой колонки — «Внешний вид → Меню → Расположение: Футер · Колонка 3».",
+            "required": 0,
+            "wrapper": { "width": "33", "class": "", "id": "" },
+            "default_value": "Сервисы",
+            "placeholder": "Сервисы"
+        },
+        {
+            "key": "field_pickprism_footer_copyright",
+            "label": "Copyright",
+            "name": "footer_copyright",
+            "type": "text",
+            "instructions": "Поддерживаются плейсхолдеры: {year} — текущий год, {site} — название сайта.\r\nПо умолчанию: «© {year} {site}. Все права защищены.»",
+            "required": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "default_value": "",
+            "placeholder": "© {year} {site}. Все права защищены."
         }
     ],
     "location": [
@@ -135,5 +204,5 @@
     "active": true,
     "description": "Глобальные настройки темы. Каждая вкладка отвечает за свой блок.",
     "show_in_rest": 0,
-    "modified": 1778889600
+    "modified": 1778976000
 }

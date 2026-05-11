@@ -46,8 +46,10 @@ add_action(
 
 		register_nav_menus(
 			array(
-				'primary' => __( 'Главное меню', 'pickprism' ),
-				'footer'  => __( 'Меню футера', 'pickprism' ),
+				'primary'  => __( 'Главное меню', 'pickprism' ),
+				'footer-1' => __( 'Футер · Колонка 1', 'pickprism' ),
+				'footer-2' => __( 'Футер · Колонка 2', 'pickprism' ),
+				'footer-3' => __( 'Футер · Колонка 3', 'pickprism' ),
 			)
 		);
 	}
