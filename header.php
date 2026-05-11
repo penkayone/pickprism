@@ -47,7 +47,6 @@ $page_class = is_front_page() ? 'ha-page' : '';
 					array(
 						'theme_location' => 'primary',
 						'container'      => false,
-						'items_wrap'     => '%3$s',
 						'menu_class'     => 'pa-nav__list',
 						'depth'          => 1,
 						'fallback_cb'    => '__return_empty_string',

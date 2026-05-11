@@ -82,14 +82,32 @@
 }
 
 // ── Основная навигация ─────────────────────────────────────────────────────
+// Поддерживаются две структуры:
+//   1) wp_nav_menu → <nav class="pa-nav"><ul class="pa-nav__list"><li><a/></li>…
+//   2) fallback   → <nav class="pa-nav"><a/><a/>…  (когда меню `primary` не назначено)
 .pa-nav {
   display: none;
   flex: 1;
   gap: 28px;
+  align-items: center;
 
   @include bp-lg { display: flex; }
 
-  a {
+  // wp_nav_menu генерирует <ul> — распластаем flex и убираем list-стили.
+  &__list {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li { list-style: none; }
+  }
+
+  // Стили ссылок применяем и к fallback (.pa-nav > a), и к wp_nav_menu (.pa-nav__list a).
+  > a,
+  &__list a {
     font-family: var(--font-sans);
     font-size: 14.5px;
     font-weight: var(--fw-medium);
@@ -110,24 +128,16 @@
 
     &:hover { color: var(--c-text); }
     &:hover::after { right: 0; }
-
-    &.is-current,
-    // Совместимость с wp_nav_menu — WP добавляет эти классы к текущему пункту.
-    li.current-menu-item > &,
-    li.current_page_item > & {
-      color: var(--c-text);
-      &::after { right: 0; }
-    }
   }
 
-  // wp_nav_menu генерирует <ul><li><a>…</a></li></ul> — распластаем flex.
-  ul,
-  & > div > ul {
-    display: flex;
-    gap: 28px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  // Активный пункт: fallback-класс is-current + классы wp_nav_menu.
+  > a.is-current,
+  &__list .current-menu-item > a,
+  &__list .current-menu-ancestor > a,
+  &__list .current_page_item > a,
+  &__list .current_page_ancestor > a {
+    color: var(--c-text);
+    &::after { right: 0; }
   }
 }
 
