@@ -52,6 +52,7 @@ pickprism_require_modules(
 		'comments',
 		'categories-page',
 		'acf',
+		'labels',
 		'fixtures',
 	)
 );

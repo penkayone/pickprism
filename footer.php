@@ -24,7 +24,7 @@ $footer_col_titles = array(
 	3 => $has_acf ? trim( (string) get_field( 'footer_col3_title', 'option' ) ) : '',
 );
 $footer_col_defaults = array(
-	1 => __( 'Рубрики', 'pickprism' ),
+	1 => __( 'Категории', 'pickprism' ),
 	2 => __( 'Проект', 'pickprism' ),
 	3 => __( 'Сервисы', 'pickprism' ),
 );

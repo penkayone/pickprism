@@ -9,11 +9,19 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 ?>
+<?php if ( is_category() || is_tag() ) : ?>
+	<div class="ha-container">
+		<?php get_template_part( 'template-parts/taxonomy-hero' ); ?>
+	</div>
+<?php endif; ?>
+
 <div class="ha-container">
-	<header class="page-header">
-		<?php the_archive_title( '<h1 class="page-header__title">', '</h1>' ); ?>
-		<?php the_archive_description( '<p class="page-header__desc">', '</p>' ); ?>
-	</header>
+	<?php if ( ! is_category() && ! is_tag() ) : ?>
+		<header class="page-header">
+			<?php the_archive_title( '<h1 class="page-header__title">', '</h1>' ); ?>
+			<?php the_archive_description( '<p class="page-header__desc">', '</p>' ); ?>
+		</header>
+	<?php endif; ?>
 
 	<div class="ha-withside">
 		<section class="ha-feed" id="feed" data-feed-container>
