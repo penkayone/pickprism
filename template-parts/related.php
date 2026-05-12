@@ -76,8 +76,6 @@ if ( ! $q->have_posts() ) {
 				<div class="pa-rcard__body">
 					<h3 class="pa-rcard__title"><?php echo esc_html( get_the_title() ); ?></h3>
 					<div class="pa-rcard__meta">
-						<span><?php echo esc_html( get_the_author() ); ?></span>
-						<span class="pa-rcard__dot" aria-hidden="true">·</span>
 						<span>
 							<?php
 							/* translators: %d: минуты */

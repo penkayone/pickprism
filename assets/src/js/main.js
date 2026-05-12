@@ -45,20 +45,48 @@ ready(() => {
   }
 
   // Копирование ссылки (mobile share bar + share-horizontal).
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    // Fallback для http/insecure context (например, *.local в dev).
+    return new Promise((resolve, reject) => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        ok ? resolve() : reject(new Error('execCommand copy failed'));
+      } catch (err) {
+        document.body.removeChild(ta);
+        reject(err);
+      }
+    });
+  };
+
   document.querySelectorAll('[data-copy-link]').forEach((btn) => {
+    let resetTimer = null;
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const url = btn.dataset.copyLink || '';
-      if (!url || !navigator.clipboard) return;
-      navigator.clipboard.writeText(url).then(() => {
+      if (!url) return;
+      copyToClipboard(url).then(() => {
         const original = btn.getAttribute('aria-label') || '';
         btn.setAttribute('aria-label', 'Скопировано');
-        btn.style.color = 'var(--c-accent)';
-        setTimeout(() => {
+        btn.classList.add('is-copied');
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => {
           btn.setAttribute('aria-label', original);
-          btn.style.color = '';
+          btn.classList.remove('is-copied');
         }, 1600);
-      });
+      }).catch(() => {});
     });
   });
 });
