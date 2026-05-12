@@ -25,16 +25,7 @@ $pickprism_drawer_tg = pickprism_social_url( 'telegram' );
 	<div class="pa-drawer__backdrop" data-drawer-close aria-hidden="true"></div>
 	<div class="pa-drawer__panel" role="document">
 		<div class="pa-drawer__head">
-			<a class="pa-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" tabindex="-1">
-				<?php
-				$first_letter = strtoupper( mb_substr( get_bloginfo( 'name' ), 0, 1, 'UTF-8' ) );
-				if ( $first_letter === '' ) {
-					$first_letter = 'P';
-				}
-				?>
-				<span class="pa-logo__mark" aria-hidden="true"><?php echo esc_html( $first_letter ); ?></span>
-				<span class="pa-logo__text"><?php bloginfo( 'name' ); ?></span>
-			</a>
+			<?php get_template_part( 'template-parts/site-logo', null, array( 'tabindex' => '-1' ) ); ?>
 			<button
 				type="button"
 				class="pa-drawer__close"

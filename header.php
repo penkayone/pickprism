@@ -29,16 +29,7 @@ $page_class = is_front_page() ? 'ha-page' : '';
 
 <header class="pa-header" role="banner" data-header>
 	<div class="pa-header__inner">
-		<a class="pa-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-			<?php
-			$first_letter = strtoupper( mb_substr( get_bloginfo( 'name' ), 0, 1, 'UTF-8' ) );
-			if ( $first_letter === '' ) {
-				$first_letter = 'P';
-			}
-			?>
-			<span class="pa-logo__mark" aria-hidden="true"><?php echo esc_html( $first_letter ); ?></span>
-			<span class="pa-logo__text"><?php bloginfo( 'name' ); ?></span>
-		</a>
+		<?php get_template_part( 'template-parts/site-logo' ); ?>
 
 		<nav class="pa-nav" aria-label="<?php esc_attr_e( 'Основные ссылки', 'pickprism' ); ?>">
 			<?php
