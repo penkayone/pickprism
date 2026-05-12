@@ -135,6 +135,7 @@ $footer_copyright = strtr(
 </footer>
 
 <?php get_template_part( 'template-parts/scroll-top' ); ?>
+<?php get_template_part( 'template-parts/mobile-drawer' ); ?>
 
 <?php wp_footer(); ?>
 </body>

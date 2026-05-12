@@ -82,13 +82,26 @@ $page_class = is_front_page() ? 'ha-page' : '';
 
 			<?php $pickprism_header_tg = pickprism_social_url( 'telegram' ); ?>
 			<a
-				class="pa-btn pa-btn--accent"
+				class="pa-btn pa-btn--accent pa-header__tg"
 				href="<?php echo esc_url( $pickprism_header_tg !== '' ? $pickprism_header_tg : 'https://t.me/' ); ?>"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
 				<?php esc_html_e( 'Telegram', 'pickprism' ); ?>
 			</a>
+
+			<button
+				type="button"
+				class="pa-burger"
+				aria-label="<?php esc_attr_e( 'Открыть меню', 'pickprism' ); ?>"
+				aria-expanded="false"
+				aria-controls="pa-drawer"
+				data-menu-toggle
+			>
+				<span aria-hidden="true"></span>
+				<span aria-hidden="true"></span>
+				<span aria-hidden="true"></span>
+			</button>
 		</div>
 
 		<form

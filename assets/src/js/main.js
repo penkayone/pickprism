@@ -7,6 +7,7 @@ import { initRevealAnimations } from './animations.js';
 import { initComments } from './comments.js';
 import { initReadingProgress } from './reading-progress.js';
 import { initScrollTop } from './scroll-top.js';
+import { initMobileMenu } from './mobile-menu.js';
 
 const ready = (fn) => {
   if (document.readyState !== 'loading') {
@@ -28,6 +29,9 @@ ready(() => {
 
   // Кнопка «Наверх» — всегда, JS сам проверит наличие [data-scroll-top].
   initScrollTop();
+
+  // Мобильный бургер-drawer — модуль сам проверит наличие toggle/drawer.
+  initMobileMenu();
 
   // Лента / infinite scroll — только если на странице есть feed-container.
   if (document.querySelector('[data-feed-container]')) {
