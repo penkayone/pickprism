@@ -75,16 +75,6 @@ if ( ! $q->have_posts() ) {
 				</div>
 				<div class="pa-rcard__body">
 					<h3 class="pa-rcard__title"><?php echo esc_html( get_the_title() ); ?></h3>
-					<div class="pa-rcard__meta">
-						<span><?php echo esc_html( get_the_author() ); ?></span>
-						<span class="pa-rcard__dot" aria-hidden="true">·</span>
-						<span>
-							<?php
-							/* translators: %d: минуты */
-							echo esc_html( sprintf( __( '%d мин', 'pickprism' ), $r_read ) );
-							?>
-						</span>
-					</div>
 				</div>
 			</a>
 			<?php
