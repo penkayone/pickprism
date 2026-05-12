@@ -2,28 +2,26 @@
 @use '../abstracts/mixins' as *;
 
 // ══════════════════════════════════════════════════════════════════════════
-// Taxonomy hero — заголовок страниц /category/* и /tag/*.
-// Слева — hue-бэйдж (квадрат с буквой или #), справа — kicker + title + meta.
-// Hue приходит инлайн-стилем от term_id, такой же как у обложек постов.
+// Taxonomy hero — компактный header страниц /category/* и /tag/*.
+// Тонкая вертикальная полоска hue слева — единственный визуальный маркер
+// принадлежности. Без бэйджа и иконок.
 // ══════════════════════════════════════════════════════════════════════════
 .pa-taxhero {
   --tax-hue: var(--hue, 24);
-  margin: 28px 0 36px;
-  padding: 32px 36px;
-  border-radius: var(--radius-xl);
-  background:
-    radial-gradient(circle at 20% 0%, hsl(var(--tax-hue) 90% 96%) 0%, transparent 60%),
-    var(--c-bg-card);
+  margin: 16px 0 20px;
+  padding: 18px 22px 18px 26px;
+  border-radius: var(--radius-lg);
+  background: var(--c-bg-card);
   border: 1px solid var(--c-border);
   position: relative;
   overflow: hidden;
 
-  // Цветная полоска слева — связь с hue.
+  // Тонкая цветная полоска слева — маркер таксономии.
   &::before {
     content: '';
     position: absolute;
     top: 0; bottom: 0; left: 0;
-    width: 4px;
+    width: 3px;
     background: linear-gradient(
       180deg,
       hsl(var(--tax-hue) 78% 58%),
@@ -32,45 +30,7 @@
   }
 
   &__inner {
-    display: grid;
-    grid-template-columns: 96px 1fr;
-    gap: 28px;
-    align-items: center;
-  }
-
-  &__badge {
-    width: 96px;
-    height: 96px;
-    border-radius: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(
-      135deg,
-      hsl(var(--tax-hue) 78% 58%),
-      hsl(calc(var(--tax-hue) + 30) 82% 44%)
-    );
-    box-shadow: 0 14px 40px -16px hsl(var(--tax-hue) 70% 50% / 0.55);
-    flex-shrink: 0;
-  }
-
-  &__letter {
-    font-family: var(--font-display);
-    font-weight: var(--fw-extrabold);
-    font-size: 52px;
-    line-height: 1;
-    color: #fff;
-    letter-spacing: -0.02em;
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
-  }
-
-  &__hash {
-    font-family: var(--font-display);
-    font-weight: var(--fw-extrabold);
-    font-size: 58px;
-    line-height: 1;
-    color: #fff;
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
+    min-width: 0;
   }
 
   &__body {
@@ -78,54 +38,52 @@
   }
 
   &__kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    display: inline-block;
     font-family: var(--font-sans);
     font-size: 11px;
     font-weight: var(--fw-bold);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--c-accent-text);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 
   &__title {
     font-family: var(--font-display);
     font-weight: var(--fw-extrabold);
-    font-size: clamp(28px, 4.4vw, 44px);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: clamp(22px, 3vw, 30px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
     color: var(--c-text);
-    margin: 0 0 10px;
+    margin: 0;
   }
 
   &__desc {
     font-family: var(--font-sans);
-    font-size: 15.5px;
+    font-size: 14.5px;
     line-height: 1.55;
     color: var(--c-text-muted);
-    margin: 0 0 14px;
-    max-width: 60ch;
+    margin: 8px 0 0;
+    max-width: 70ch;
   }
 
   &__meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 10px 18px;
-    margin-top: 4px;
+    gap: 8px 16px;
+    margin-top: 10px;
   }
 
   &__count {
     display: inline-flex;
     align-items: center;
-    padding: 5px 11px;
+    padding: 3px 9px;
     border-radius: var(--radius-full, 999px);
     background: hsl(var(--tax-hue) 90% 96%);
     color: hsl(var(--tax-hue) 65% 32%);
     font-family: var(--font-sans);
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: var(--fw-semibold);
     letter-spacing: 0.01em;
   }
@@ -135,11 +93,11 @@
     align-items: center;
     gap: 6px;
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: var(--fw-semibold);
     color: var(--c-text-muted);
     text-decoration: none;
-    transition: color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+    transition: color var(--dur-fast) var(--ease-out);
 
     svg { transition: transform var(--dur-fast) var(--ease-out); }
 
@@ -156,38 +114,13 @@
     }
   }
 
-  // ── Tag-вариант: hash вместо буквы, без back-link, чуть мягче по оттенкам ─
-  &--tag {
-    .pa-taxhero__badge {
-      // Чуть приглушённый — кольцо для tag читается легче чем литая категория.
-      background:
-        linear-gradient(135deg, hsl(var(--tax-hue) 78% 58%), hsl(calc(var(--tax-hue) + 30) 82% 44%));
-    }
-  }
-
-  // ── Mobile (≤md): badge меньше, заголовок переходит ниже ──────────────────
   @include bp-down-md {
-    padding: 22px 20px;
-    margin: 18px 0 24px;
-    border-radius: var(--radius-lg);
+    padding: 14px 16px 14px 20px;
+    margin: 12px 0 16px;
+    border-radius: var(--radius-md);
 
-    &__inner {
-      grid-template-columns: 64px 1fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    &__badge {
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-    }
-
-    &__letter { font-size: 36px; }
-    &__hash   { font-size: 38px; }
-
-    &__title { font-size: 24px; line-height: 1.15; }
-    &__desc  { font-size: 14.5px; }
-    &__meta  { gap: 8px 14px; }
+    &__title { font-size: 20px; }
+    &__desc  { font-size: 13.5px; }
+    &__meta  { gap: 6px 12px; margin-top: 8px; }
   }
 }

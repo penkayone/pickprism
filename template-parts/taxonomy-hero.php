@@ -33,14 +33,6 @@ $description = trim( (string) $term->description );
 	aria-labelledby="taxhero-title"
 >
 	<div class="pa-taxhero__inner">
-		<div class="pa-taxhero__badge" aria-hidden="true">
-			<?php if ( $is_tag ) : ?>
-				<span class="pa-taxhero__hash">#</span>
-			<?php else : ?>
-				<span class="pa-taxhero__letter"><?php echo esc_html( $letter ); ?></span>
-			<?php endif; ?>
-		</div>
-
 		<div class="pa-taxhero__body">
 			<span class="pa-taxhero__kicker"><?php echo esc_html( $kicker ); ?></span>
 			<h1 id="taxhero-title" class="pa-taxhero__title"><?php echo esc_html( $term->name ); ?></h1>
