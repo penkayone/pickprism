@@ -10,13 +10,32 @@ defined( 'ABSPATH' ) || exit;
 get_header();
 ?>
 <div class="ha-container">
-	<header class="page-header">
-		<h1 class="page-header__title">
-			<?php
-			/* translators: %s: поисковый запрос */
-			echo esc_html( sprintf( __( 'Поиск: %s', 'pickprism' ), get_search_query() ) );
-			?>
-		</h1>
+	<?php
+	$pickprism_q = get_search_query();
+	$pickprism_found = (int) ( $GLOBALS['wp_query']->found_posts ?? 0 );
+	?>
+	<header class="pa-taxhero" style="--hue: 24;" aria-labelledby="search-title">
+		<div class="pa-taxhero__inner">
+			<div class="pa-taxhero__body">
+				<span class="pa-taxhero__kicker"><?php esc_html_e( 'Поиск', 'pickprism' ); ?></span>
+				<h1 id="search-title" class="pa-taxhero__title">
+					<?php echo $pickprism_q !== '' ? esc_html( $pickprism_q ) : esc_html__( 'Пустой запрос', 'pickprism' ); ?>
+				</h1>
+				<div class="pa-taxhero__meta">
+					<span class="pa-taxhero__count">
+						<?php
+						/* translators: %s — количество результатов */
+						echo esc_html(
+							sprintf(
+								_n( '%s результат', '%s результатов', $pickprism_found, 'pickprism' ),
+								number_format_i18n( $pickprism_found )
+							)
+						);
+						?>
+					</span>
+				</div>
+			</div>
+		</div>
 	</header>
 
 	<div class="ha-withside">

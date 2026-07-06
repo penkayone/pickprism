@@ -1,0 +1,126 @@
+@use '../abstracts/tokens' as *;
+@use '../abstracts/mixins' as *;
+
+// ══════════════════════════════════════════════════════════════════════════
+// Taxonomy hero — компактный header страниц /category/* и /tag/*.
+// Тонкая вертикальная полоска hue слева — единственный визуальный маркер
+// принадлежности. Без бэйджа и иконок.
+// ══════════════════════════════════════════════════════════════════════════
+.pa-taxhero {
+  --tax-hue: var(--hue, 24);
+  margin: 16px 0 20px;
+  padding: 18px 22px 18px 26px;
+  border-radius: var(--radius-lg);
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  position: relative;
+  overflow: hidden;
+
+  // Тонкая цветная полоска слева — маркер таксономии.
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 3px;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--tax-hue) 78% 58%),
+      hsl(calc(var(--tax-hue) + 30) 82% 44%)
+    );
+  }
+
+  &__inner {
+    min-width: 0;
+  }
+
+  &__body {
+    min-width: 0;
+  }
+
+  &__kicker {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: var(--fw-bold);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-accent-text);
+    margin-bottom: 4px;
+  }
+
+  &__title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: clamp(22px, 3vw, 30px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--c-text);
+    margin: 0;
+  }
+
+  &__desc {
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--c-text-muted);
+    margin: 8px 0 0;
+    max-width: 70ch;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin-top: 10px;
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: var(--radius-full, 999px);
+    background: hsl(var(--tax-hue) 90% 96%);
+    color: hsl(var(--tax-hue) 65% 32%);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.01em;
+  }
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-muted);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-out);
+
+    svg { transition: transform var(--dur-fast) var(--ease-out); }
+
+    &:hover {
+      color: var(--c-accent);
+      svg { transform: translateX(-3px); }
+    }
+
+    &:focus-visible {
+      color: var(--c-accent);
+      outline: 2px solid var(--c-accent);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+  }
+
+  @include bp-down-md {
+    padding: 14px 16px 14px 20px;
+    margin: 12px 0 16px;
+    border-radius: var(--radius-md);
+
+    &__title { font-size: 20px; }
+    &__desc  { font-size: 13.5px; }
+    &__meta  { gap: 6px 12px; margin-top: 8px; }
+  }
+}

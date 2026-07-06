@@ -24,7 +24,7 @@ $footer_col_titles = array(
 	3 => $has_acf ? trim( (string) get_field( 'footer_col3_title', 'option' ) ) : '',
 );
 $footer_col_defaults = array(
-	1 => __( 'Рубрики', 'pickprism' ),
+	1 => __( 'Категории', 'pickprism' ),
 	2 => __( 'Проект', 'pickprism' ),
 	3 => __( 'Сервисы', 'pickprism' ),
 );
@@ -56,16 +56,7 @@ $footer_copyright = strtr(
 <footer class="pa-footer" role="contentinfo">
 	<div class="pa-footer__top">
 		<div class="pa-footer__brand">
-			<a class="pa-logo pa-logo--light" href="<?php echo esc_url( home_url( '/' ) ); ?>">
-				<?php
-				$first_letter = strtoupper( mb_substr( get_bloginfo( 'name' ), 0, 1, 'UTF-8' ) );
-				if ( $first_letter === '' ) {
-					$first_letter = 'P';
-				}
-				?>
-				<span class="pa-logo__mark" aria-hidden="true"><?php echo esc_html( $first_letter ); ?></span>
-				<span class="pa-logo__text"><?php bloginfo( 'name' ); ?></span>
-			</a>
+			<?php get_template_part( 'template-parts/site-logo', null, array( 'variant' => 'light' ) ); ?>
 			<?php if ( $footer_description !== '' ) : ?>
 				<p><?php echo esc_html( $footer_description ); ?></p>
 			<?php endif; ?>
