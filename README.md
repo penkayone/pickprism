@@ -1,5 +1,7 @@
 <div align="center">
 
+**Русский** · [English](README.en.md)
+
 <img src="docs/banner.svg" alt="PickPrism - Decision Engine" width="100%">
 
 <br>
